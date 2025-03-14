@@ -1,26 +1,29 @@
 <template>
-  <img alt="Vue logo" width="100px" height="100px" src="./assets/logo.png">
-  <HelloWorld msg="Under construction...Ernst has eaten too much of it."/>
+  <MainNavbar />
+  <router-view />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import MainNavbar from "./components/MainNavbar.vue";
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    MainNavbar
   }
 }
 </script>
 
 <style>
+body {
+	background-color: rgb(130, 193, 238);
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  color: #000000;
 }
 </style>
