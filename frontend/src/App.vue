@@ -16,14 +16,13 @@ export default {
 
 <style>
 body {
-	background-color: rgb(130, 193, 238);
+	background-color: rgb(74, 34, 34);
 }
 
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #000000;
 }
 </style>

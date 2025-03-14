@@ -5,6 +5,7 @@
 			<div class="links">
 				<li><router-link to="/">Hem</router-link></li>
 				<li><router-link to="/members">Medlemmar</router-link></li>
+				<li><router-link to="/about">Vem är vi?</router-link></li>
 			</div>
 		</ul>
 	</nav>
@@ -25,6 +26,7 @@ ul {
 }
 
 img {
+  margin-left: 20px;
   height: 100px;
   width: 100px;
 }
@@ -33,6 +35,7 @@ img {
   display: flex;
   gap: 20px; /* Controls space between links */
   margin-left: auto; /* Pushes links all the way to the right */
+  margin-right: 100px;
 }
 
 li {
