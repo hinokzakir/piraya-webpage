@@ -1,30 +1,53 @@
 <template>
-  <div class="hello">
-	<h3>members</h3>
-  </div>
+	<div class="hello">
+		<h1>Aktiva Medlemmar</h1>
+		<div class="members-container">
+			<div v-for="(member, index) in members" :key="index" class="member-card">
+				<h2>{{ member.name }}</h2>
+				<p>{{ member.role }}</p>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script>
+import membersData from '../assets/members.json'; // Import JSON file
+
 export default {
-  name: 'MembersPage'
-}
+	name: 'MembersPage',
+	data() {
+		return {
+			members: membersData // Assign imported JSON to `members`
+		};
+	}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.members-container {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Auto-adjusting grid */
+	gap: 20px; /* Space between cards */
+	padding: 20px;
+}
 
-h3 {
-  margin: 40px 0 0;
+.member-card {
+	background: rgb(121, 179, 212);
+	padding: 15px;
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	text-align: center;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+h1 {
+	font-size: 50px;
+	text-align: center;
+	color: white;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+
+h2 {
+	font-size: 24px;
+	color: white;
 }
 </style>

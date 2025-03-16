@@ -1,7 +1,7 @@
 <template>
 	<nav>
 		<ul>
-			<img alt="Vue logo" width="100px" height="100px" src="../assets/logo.png">
+			<img alt="Vue logo" width="75px" height="75px" src="../assets/logo.png">
 			<div class="links">
 				<li><router-link to="/">Hem</router-link></li>
 				<li><router-link to="/members">Medlemmar</router-link></li>
@@ -50,5 +50,6 @@ a {
 
 a:hover {
   text-decoration: underline;
+  color: firebrick;
 }
 </style>
