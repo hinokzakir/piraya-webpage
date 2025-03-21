@@ -17,6 +17,9 @@ export default {
 <style>
 body {
 	background-color: rgb(74, 34, 34);
+	background-image: url("./assets/bg1.jpeg");
+	background-repeat: repeat-x;
+	background-size: auto, auto;
 }
 
 #app {

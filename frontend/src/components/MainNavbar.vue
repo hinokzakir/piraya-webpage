@@ -15,6 +15,9 @@
 nav {
   background: #641818; /* Match your background */
   padding: 10px 20px;
+  background: rgb(117,59,59);
+  background: linear-gradient(0deg, rgba(117,59,59,1) 7%, rgba(168,24,12,1) 100%);
+  border-radius: 10px;
 }
 
 ul {
@@ -49,7 +52,7 @@ a {
 }
 
 a:hover {
-  text-decoration: underline;
   color: firebrick;
+  background-color: white;
 }
 </style>

@@ -30,6 +30,12 @@ export default {
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Auto-adjusting grid */
 	gap: 20px; /* Space between cards */
 	padding: 20px;
+	background: rgba(116, 218, 255, 0.5);
+	border-radius: 16px;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(9.5px);
+	-webkit-backdrop-filter: blur(9.5px);
+	border: 1px solid rgba(11, 240, 255, 0.31);
 }
 
 .member-card {
