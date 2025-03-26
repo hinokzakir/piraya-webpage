@@ -5,7 +5,7 @@
 			<div class="links">
 				<li><router-link to="/">Hem</router-link></li>
 				<li><router-link to="/members">Medlemmar</router-link></li>
-				<li><router-link to="/about">Vem är vi?</router-link></li>
+				<li><router-link to="/about">Om oss</router-link></li>
 			</div>
 		</ul>
 	</nav>

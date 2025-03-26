@@ -52,6 +52,7 @@ h1 {
 	font-size: 50px;
 	text-align: center;
 	color: white;
+	text-shadow: 2px 2px 4px #000000;
 }
 
 h2 {

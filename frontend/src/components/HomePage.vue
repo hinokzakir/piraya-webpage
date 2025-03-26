@@ -12,11 +12,12 @@
 			</div>
 		</div>
 		<div class="info-container">
-			<div class="landing-text">
-				<!--<img alt="Vue logo" width="500px" height="400px" src="../assets/info.jpg">-->
+			<div class="landing-events">
+				<div class="title">NYHETER</div>
+				<div class="fb-page" data-href="https://www.facebook.com/piraya.party.providers" data-tabs="timeline" data-width="500" data-height="500" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><blockquote cite="https://www.facebook.com/piraya.party.providers" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/piraya.party.providers">Piraya Party Providers</a></blockquote></div>
 			</div>
 			<div class="landing-events">
-				<div class="title">KOMMANDE EVENTS</div>
+				<div class="title"> KOMMANDE EVENTS</div>
 				<div class="events-container">
 					<template v-for="(event, index) in event" :key="index">
 						<div class="event-card">
@@ -55,6 +56,7 @@ export default {
 	color: rgb(161, 20, 20);
 	font-family: "Impact", sans-serif;
 	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+	text-shadow: #000 1px 0 10px;
 }
 
 .landing-container {
@@ -88,6 +90,7 @@ export default {
 	backdrop-filter: blur(9.5px);
 	-webkit-backdrop-filter: blur(9.5px);
 	border: 1px solid rgba(11, 240, 255, 0.31);
+	margin: 50px;
 }
 
 .event-container {
@@ -146,6 +149,7 @@ h1 {
 
 p {
 	color: white;
+	text-shadow: #000 1px 0 10px;
 }
 
 .landing-text {
