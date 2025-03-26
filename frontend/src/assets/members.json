@@ -1,22 +1,178 @@
 [
 	{
-		"name": "Hinok 'Affe' Zakir Saleh",
-		"role": "SP"
+		"Smeknamn": "Affe",
+		"Namn": "Hinok Zakir Saleh",
+		"Roll": "SP",
+		"quote": "Jag svär jag pissade två gånger",
+		"bild": "./member_img/hinok_zakir_saleh.jpg",
+		"telefonnummer": "0720122851"
 	},
 	{
-		"name": "Rickard 'Räkan' Hellqvist Collins",
-		"role": "SID"
+		"Smeknamn": "Räkan",
+		"Namn": "Rickard Hellqvist Collins",
+		"Roll": "SID",
+		"quote": "En vinnare är en förlorare som försökte en gång till.",
+		"bild": "./member_img/rickard_hellqvist_collins.jpg",
+		"telefonnummer": "0706176126"
 	},
 	{
-		"name": "Samuel 'Findus' Johansson",
-		"role": "BrewFisk"
+		"Smeknamn": "Hans",
+		"Namn": "Teodor Bäckström",
+		"Roll": "XSP",
+		"quote": "Jag är full, men det är ingen fara",
+		"bild": "./member_img/teodor_backstrom.jpg",
+		"telefonnummer": "0702981918"
 	},
 	{
-		"name": "Vincent 'Torkel' Öhlund",
-		"role": "PR-Fisk"
+		"Smeknamn": "Otto",
+		"Namn": "Oskar By",
+		"Roll": "XSID",
+		"quote": "DL skriv ett citat på mig",
+		"bild": "./member_img/oskar_by.jpg",
+		"telefonnummer": "0730489667"
 	},
 	{
-		"name": "Natnael 'Nattis' Gebremedhin",
-		"role": "Diversity Hire"
+		"Smeknamn": "Nilf",
+		"Namn": "William Nilsson",
+		"Roll": "XXSP",
+		"quote": "Jag har ju varit president längre än Magdalena Andersson varit stadsminister",
+		"bild": "./member_img/william_nilsson.jpg",
+		"telefonnummer": "0761421838"
+	},
+	{
+		"Smeknamn": "VB",
+		"Namn": "Jacob Jerkérus",
+		"Roll": "XXSP",
+		"quote": "Fan jag ska upp 9 imorn för att träffa min kyrkoherde",
+		"bild": "./member_img/jacob_jerkerus.jpg",
+		"telefonnummer": "0768275454"
+	},
+	{
+		"Smeknamn": "Grämmel",
+		"Namn": "Joar Eliasson",
+		"Roll": "XXXSP",
+		"quote": "Om linsen fastnar bakom ögat skiter man ut den ju",
+		"bild": "./member_img/joar_eliasson.jpg",
+		"telefonnummer": "0762556955"
+	},
+	{
+		"Smeknamn": "Ezkill",
+		"Namn": "Eziz Allaberdyev",
+		"Roll": "",
+		"quote": "Har du biljett till nordkorea?",
+		"bild": "./member_img/eziz_allaberdyev.jpg",
+		"telefonnummer": "0703471776"
+	},
+	{
+		"Smeknamn": "Åsa",
+		"Namn": "Erik Risberg",
+		"Roll": "",
+		"quote": "Jag börjar med skummet..... Ahh det är skum",
+		"bild": "./member_img/erik_risberg.jpg",
+		"telefonnummer": "0703909001"
+	},
+	{
+		"Smeknamn": "Emma",
+		"Namn": "Marcus Andersson",
+		"Roll": "Webmaster",
+		"quote": "Jag kan dricka en vanlig öl i veckan",
+		"bild": "./member_img/marcus_andersson.jpg",
+		"telefonnummer": "0766456070"
+	},
+	{
+		"Smeknamn": "Sigge",
+		"Namn": "Lucas Pedroletti",
+		"Roll": "",
+		"quote": "HJÄLP MIG, HJÄLP MIG UP, HJÄLP!!",
+		"bild": "./member_img/lucas_pedroletti.jpg",
+		"telefonnummer": "0730838228"
+	},
+	{
+		"Smeknamn": "Hooga",
+		"Namn": "Hugo Hultén",
+		"Roll": "BunkerAnsvarig",
+		"quote": "Om jag inte vaknar upp skakandes har jag inte haft en bra kväll.",
+		"bild": "./member_img/hugo_hulten.jpg",
+		"telefonnummer": "0702800760"
+	},
+	{
+		"Smeknamn": "Sten",
+		"Namn": "Axel Magnusson",
+		"Roll": "",
+		"quote": "Jag har druckit en och en halv liter av det här",
+		"bild": "./member_img/axel_magnusson.jpg",
+		"telefonnummer": "725210557"
+	},
+	{
+		"Smeknamn": "Findus",
+		"Namn": "Samuel Johansson",
+		"Roll": "Brewmaster",
+		"quote": "Köpte du 2 ciggpack? 3.",
+		"bild": "./member_img/samuel_johansson.jpg",
+		"telefonnummer": "0725507724"
+	},
+	{
+		"Smeknamn": "Bamse",
+		"Namn": "Carl Svärd",
+		"Roll": "",
+		"quote": "Jag älskar penalism",
+		"bild": "./member_img/carl_svard.jpg",
+		"telefonnummer": "0761704364"
+	},
+	{
+		"Smeknamn": "Baggen",
+		"Namn": "Tage Lindekrantz",
+		"Roll": "",
+		"quote": "Han är väldigt feminin, det kan man vara även när man är nykter",
+		"bild": "./member_img/tage_lindekrantz.jpg",
+		"telefonnummer": "0761122072"
+	},
+	{
+		"Smeknamn": "Torkel",
+		"Namn": "Vincent Öhlund",
+		"Roll": "",
+		"quote": "Låt inte gamla vanor vara stopp för nya banor",
+		"bild": "./member_img/vincent_ohlund.jpg",
+		"telefonnummer": "0706800527"
+	},
+	{
+		"Smeknamn": "Åke",
+		"Namn": "Edwin Widgren",
+		"Roll": "",
+		"quote": "Är soundboksen tung? Nej den har slut på batteri.",
+		"bild": "./member_img/edwin_widgren.jpg",
+		"telefonnummer": "0725316368"
+	},
+	{
+		"Smeknamn": "Dessi",
+		"Namn": "Sofia Westman",
+		"Roll": "",
+		"quote": "Ta ut ballarna ur munnen",
+		"bild": "./member_img/sofia_westman.jpg",
+		"telefonnummer": "0702206902"
+	},
+	{
+		"Smeknamn": "Mange",
+		"Namn": "Tiffany Jansson",
+		"Roll": "",
+		"quote": "Jag har sovit i 12 timmar, klart jag är uppe och yappar.",
+		"bild": "./member_img/tiffany_jansson.jpg",
+		"telefonnummer": "0736799007"
+	},
+	{
+		"Smeknamn": "Tesco",
+		"Namn": "Henrique Röbäck Fiusa",
+		"Roll": "",
+		"quote": "Min kuk är som en legend, ingen har sett de",
+		"bild": "./member_img/henrique_roback_fiusa.jpg",
+		"telefonnummer": "0723332939"
+	},
+	{
+		"Smeknamn": "KZ",
+		"Namn": "Jonathan Davidsson",
+		"Roll": "",
+		"quote": "Jag är gluten",
+		"bild": "./member_img/jonathan_davidsson.jpg",
+		"telefonnummer": "0727252208"
 	}
 ]

@@ -11,12 +11,37 @@
 				<img alt="Vue logo" width="500px" height="400px" src="../assets/landing.jpeg">
 			</div>
 		</div>
+		<div class="info-container">
+			<div class="landing-text">
+				<!--<img alt="Vue logo" width="500px" height="400px" src="../assets/info.jpg">-->
+			</div>
+			<div class="landing-events">
+				<div class="title">KOMMANDE EVENTS</div>
+				<div class="events-container">
+					<template v-for="(event, index) in event" :key="index">
+						<div class="event-card">
+							<h3>{{ event.name }}</h3>
+							<p>{{ event.description }}</p>
+							<p>{{ event.dateStart }}</p>
+							<p>{{ event.dateEnd}}</p>
+						</div>
+					</template>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script>
+import eventsData from '../assets/events.json';
+
 export default {
-	name: 'HomePage'
+	name: 'HomePage',
+	data() {
+		return {
+			event: eventsData // Assign imported JSON to `members`
+		};
+	}
 }
 </script>
 
@@ -47,15 +72,70 @@ export default {
 	border: 1px solid rgba(11, 240, 255, 0.31);
 }
 
+.info-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 30px;
+}
+
+.landing-events {
+	padding: 30px;
+	border-style: solid;
+	background: rgba(116, 218, 255, 0.5);
+	border-radius: 16px;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(9.5px);
+	-webkit-backdrop-filter: blur(9.5px);
+	border: 1px solid rgba(11, 240, 255, 0.31);
+}
+
+.event-container {
+	display: flex;
+	flex-direction: column;
+	margin-right: 50px;
+}
+
+.event-card {
+	margin: 10px;
+	padding: 10px;
+	border-style: solid;
+	border-color: rgb(73, 114, 142);
+	background: rgba(116, 218, 255, 0.5);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(9.5px);
+	-webkit-backdrop-filter: blur(9.5px);
+	border: 1px solid rgba(11, 240, 255, 0.31);
+	border-radius: 16px;
+}
+
 .landing-image {
 	border-style: solid;
 	border-color: rgb(73, 114, 142);
+	margin-right: 50px;
+	align-items: center;
 }
 
 @media (max-width: 768px) {
 	.landing-container {
 		flex-direction: column;
 		/* Stack items vertically */
+	}
+	.landing-image {
+		margin-right: 0;
+	}
+	img {
+		width: 100%;
+		height: auto;
+	}
+	.landing-text {
+		margin-right: 0;
+	}
+	.info-container {
+		flex-direction: column;
+	}
+	.event-container {
+		margin-right: 0;
 	}
 }
 

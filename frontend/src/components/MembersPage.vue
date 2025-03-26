@@ -3,8 +3,10 @@
 		<h1>Aktiva Medlemmar</h1>
 		<div class="members-container">
 			<div v-for="(member, index) in members" :key="index" class="member-card">
-				<h2>{{ member.name }}</h2>
-				<p>{{ member.role }}</p>
+				<h2>{{ member.Smeknamn }}</h2>
+				<p>{{ member.Namn }}</p>
+				<p>{{ member.Roll }}</p>
+				<p>Kända ord: "{{ member.quote }}"</p>
 			</div>
 		</div>
 	</div>
