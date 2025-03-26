@@ -96,7 +96,6 @@ export default {
 .event-container {
 	display: flex;
 	flex-direction: column;
-	margin-right: 50px;
 }
 
 .event-card {

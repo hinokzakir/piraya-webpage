@@ -4,6 +4,7 @@
 		<p>Piraya är Umeås Datavetares festeri. Vi verkar främst för att underhålla linjens medlemmar, men vi arrangerar även fester och evenemang för andra. Ett bra exempel på detta är Otympliga Spelen, en årlig tradition fylld med glädje, tävlingar och gemenskap! Vi hoppas verkligen att ni alla har lust att delta i dessa underbara tävlingar och skapa minnen för livet.
 
 Förutom Otympliga Spelen anordnar vi även andra uppskattade evenemang som chilisittning, gröt och glögg-kvällar, samt den klassiska ärtsoppslagningen. Dessa aktiviteter är till för att stärka gemenskapen och skapa en trivsam atmosfär för alla deltagare. Vi är också stolta över att vara en del av mottagningen, där vi hjälper till att välkomna nya studenter och introducera dem till vår fantastiska gemenskap.</p>
+		<img src="../assets/landing.jpeg" alt="image" width="500px" height="400px">
 	</div>
 </template>
 
@@ -34,6 +35,13 @@ export default {
 h1 {
   color: white;
   text-shadow: 2px 2px 4px #000000;
+}
+
+img {
+	margin: 20px;
+	border-style: solid;
+	border-radius: 16px;
+	border-color: rgb(119, 190, 231);
 }
 
 p {
