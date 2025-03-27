@@ -125,11 +125,11 @@ export default {
 	}
 
 	.landing-events iframe {
-		width: 400px;
+		width: 300px;
 	}
 
 	.landing-events {
-		width: 400px;
+		width: 300px;
 	}
 
 	.landing-image {
