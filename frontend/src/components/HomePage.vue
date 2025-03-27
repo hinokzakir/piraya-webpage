@@ -14,7 +14,7 @@
 		<div class="info-container">
 			<div class="landing-events">
 				<div class="title">NYHETER</div>
-				<div class="fb-page" data-href="https://www.facebook.com/piraya.party.providers" data-tabs="timeline" data-width="500" data-height="500" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><blockquote cite="https://www.facebook.com/piraya.party.providers" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/piraya.party.providers">Piraya Party Providers</a></blockquote></div>
+				<iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fpiraya.party.providers&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=1735511459855996" width="500" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
 			</div>
 			<div class="landing-events">
 				<div class="title"> KOMMANDE EVENTS</div>
@@ -123,6 +123,15 @@ export default {
 		flex-direction: column;
 		/* Stack items vertically */
 	}
+
+	.landing-events iframe {
+		width: 400px;
+	}
+
+	.landing-events {
+		width: 400px;
+	}
+
 	.landing-image {
 		margin-right: 0;
 	}
