@@ -4,6 +4,7 @@
 		<div class="members-container">
 			<div v-for="(member, index) in members" :key="index" class="member-card">
 				<h2>{{ member.Smeknamn }}</h2>
+				<img :src="getImage(member.bild)" alt="Member Image" class="member-image" />
 				<p>{{ member.Namn }}</p>
 				<p>{{ member.Roll }}</p>
 				<p>Kända ord: "{{ member.quote }}"</p>
@@ -21,6 +22,18 @@ export default {
 		return {
 			members: membersData // Assign imported JSON to `members`
 		};
+	},
+
+	methods: {
+		getImage(imagePath) {
+			try {
+				// Använd require för att dynamiskt ladda bilden baserat på sökvägen från JSON
+				return require(`@/assets/${imagePath}`);
+			} catch (e) {
+				console.error(`Kunde inte ladda bild: ${imagePath}`, e);
+				return ''; // Returnera en tom sträng eller en standardbild om det misslyckas
+			}
+		}
 	}
 };
 </script>
@@ -46,6 +59,15 @@ export default {
 	border-radius: 8px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 	text-align: center;
+}
+
+.member-image {
+	width: 100px; /* Fast bredd för cirkeln */
+	height: 100px; /* Fast höjd för cirkeln */
+	border-radius: 50%; /* Gör bilden cirkulär */
+	object-fit: cover; /* Beskär bilden för att passa utan att förvrängas */
+	display: block; /* Förhindrar extra utrymme under bilden */
+	margin: 0 auto; /* Centrera bilden horisontellt i kortet */
 }
 
 h1 {
