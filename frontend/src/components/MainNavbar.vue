@@ -44,7 +44,8 @@ nav {
 	position: sticky;
 	top: 0;
 	left: 0;
-	width: 100%;
+	right: 0;
+	width: 97%;
 	z-index: 1000;
 }
 
