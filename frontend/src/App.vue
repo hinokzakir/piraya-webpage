@@ -1,6 +1,8 @@
 <template>
   <MainNavbar />
-  <router-view />
+  <transition name="slide" mode="out-in">
+	<router-view />
+  </transition>
 </template>
 
 <script>
@@ -28,5 +30,19 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #000000;
+}
+
+/* Transition styles */
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-leave-to {
+  transform: translateX(-100%);
 }
 </style>
