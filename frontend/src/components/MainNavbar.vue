@@ -8,7 +8,7 @@
 				<span></span>
 			</div>
 			<transition name="menu-slide">
-				<div class="links" v-show="menuOpen">
+				<div class="links" :class="{ 'mobile-active': menuOpen }">
 					<li><router-link to="/" @click="closeMenu">Hem</router-link></li>
 					<li><router-link to="/members" @click="closeMenu">Medlemmar</router-link></li>
 					<li><router-link to="/about" @click="closeMenu">Om oss</router-link></li>
@@ -92,6 +92,7 @@ img {
 	transform: rotate(-45deg) translate(7px, -7px);
 }
 
+/* Desktop styles */
 .links {
 	display: flex;
 	gap: 20px;
@@ -126,25 +127,15 @@ a:hover {
 	opacity: 0;
 }
 
-/* Media Query for Mobile */
+/* Mobile styles */
 @media screen and (max-width: 768px) {
-	.nav {
-		background: #641818;
-		padding: 10px 20px;
-		background: rgb(117, 59, 59);
-		background: linear-gradient(0deg, rgba(117, 59, 59, 1) 7%, rgba(168, 24, 12, 1) 100%);
-		border-radius: 10px 10px 0 0;
-		position: sticky;
-		top: 0;
-		width: auto;
-		z-index: 1000;
-	}
-
 	.hamburger {
 		display: block;
 	}
 
 	.links {
+		display: none;
+		/* Hidden by default on mobile */
 		position: absolute;
 		top: 100%;
 		left: 0;
@@ -156,10 +147,9 @@ a:hover {
 		border-radius: 0 0 10px 10px;
 	}
 
-	/* Remove the display: none from .links and handle visibility through v-show */
-	.links {
+	.links.mobile-active {
 		display: flex;
-		/* Base state for animation */
+		/* Show when menu is open */
 	}
 
 	li {
