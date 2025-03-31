@@ -2,16 +2,18 @@
 	<nav>
 		<ul>
 			<img alt="Vue logo" width="75px" height="75px" src="../assets/logo.png">
-			<div class="hamburger" @click="toggleMenu">
+			<div class="hamburger" @click="toggleMenu" :class="{ 'open': menuOpen }">
 				<span></span>
 				<span></span>
 				<span></span>
 			</div>
-			<div class="links" :class="{ 'show': menuOpen }">
-				<li><router-link to="/" @click="closeMenu">Hem</router-link></li>
-				<li><router-link to="/members" @click="closeMenu">Medlemmar</router-link></li>
-				<li><router-link to="/about" @click="closeMenu">Om oss</router-link></li>
-			</div>
+			<transition name="menu-slide">
+				<div class="links" v-show="menuOpen">
+					<li><router-link to="/" @click="closeMenu">Hem</router-link></li>
+					<li><router-link to="/members" @click="closeMenu">Medlemmar</router-link></li>
+					<li><router-link to="/about" @click="closeMenu">Om oss</router-link></li>
+				</div>
+			</transition>
 		</ul>
 	</nav>
 </template>
@@ -44,8 +46,7 @@ nav {
 	position: sticky;
 	top: 0;
 	left: 0;
-	right: 0;
-	width: 97%;
+	width: auto;
 	z-index: 1000;
 }
 
@@ -65,7 +66,6 @@ img {
 
 .hamburger {
 	display: none;
-	/* Hidden by default on larger screens */
 	cursor: pointer;
 	margin-left: auto;
 	margin-right: 20px;
@@ -77,7 +77,19 @@ img {
 	height: 3px;
 	background: white;
 	margin: 5px 0;
-	transition: 0.3s;
+	transition: all 0.3s ease;
+}
+
+.hamburger.open span:nth-child(1) {
+	transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.open span:nth-child(2) {
+	opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+	transform: rotate(-45deg) translate(7px, -7px);
 }
 
 .links {
@@ -85,7 +97,6 @@ img {
 	gap: 20px;
 	margin-left: auto;
 	margin-right: 100px;
-	transition: 0.3s;
 }
 
 li {
@@ -103,15 +114,37 @@ a:hover {
 	background-color: white;
 }
 
+/* Menu slide animation */
+.menu-slide-enter-active,
+.menu-slide-leave-active {
+	transition: all 0.3s ease;
+}
+
+.menu-slide-enter-from,
+.menu-slide-leave-to {
+	transform: translateY(-100%);
+	opacity: 0;
+}
+
 /* Media Query for Mobile */
 @media screen and (max-width: 768px) {
+	.nav {
+		background: #641818;
+		padding: 10px 20px;
+		background: rgb(117, 59, 59);
+		background: linear-gradient(0deg, rgba(117, 59, 59, 1) 7%, rgba(168, 24, 12, 1) 100%);
+		border-radius: 10px 10px 0 0;
+		position: sticky;
+		top: 0;
+		width: auto;
+		z-index: 1000;
+	}
+
 	.hamburger {
 		display: block;
 	}
 
 	.links {
-		display: none;
-		/* Hidden by default on mobile */
 		position: absolute;
 		top: 100%;
 		left: 0;
@@ -123,9 +156,10 @@ a:hover {
 		border-radius: 0 0 10px 10px;
 	}
 
-	.links.show {
+	/* Remove the display: none from .links and handle visibility through v-show */
+	.links {
 		display: flex;
-		/* Show when menuOpen is true */
+		/* Base state for animation */
 	}
 
 	li {

@@ -59,6 +59,10 @@ p {
   p {
 	max-width: 100%;
   }
+  img {
+	width: 300px;
+	height: 200px;
+  }
 	
 }
 
