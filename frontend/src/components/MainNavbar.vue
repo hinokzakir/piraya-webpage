@@ -18,6 +18,11 @@ nav {
   background: rgb(117,59,59);
   background: linear-gradient(0deg, rgba(117,59,59,1) 7%, rgba(168,24,12,1) 100%);
   border-radius: 10px;
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
 }
 
 ul {
