@@ -1,6 +1,9 @@
 <template>
   <div class="homepage-root">
-    <div class="carousel-wrapper">
+    <div v-if="!imagesLoaded" class="loader-wrapper">
+      <div class="loader"></div>
+    </div>
+    <div v-else class="carousel-wrapper">
       <transition-group name="fade" tag="div">
         <img
           v-for="(img, idx) in images"
@@ -12,12 +15,12 @@
         />
       </transition-group>
       <div class="background-gradient"></div>
+      <div class="bottom-vignette"></div>
     </div>
-    <div class="hero-title-wrapper">
+    <div class="hero-title-wrapper" v-if="imagesLoaded">
       <h1 class="hero-title">PIRAYA PARTY PROVIDERS</h1>
       <div class="hero-subtitle">FÖRSER FESTER TILL UMEÅS DATAVETARE M.FL. SEDAN 1985</div>
     </div>
-    <!-- Här kan du lägga till mer innehåll senare -->
   </div>
 </template>
 
@@ -26,10 +29,10 @@ export default {
   data() {
     return {
       images: [
-        require('../assets/homepage/DSC04149.png'),
-        require('../assets/homepage/DSC04425.png'),
-        require('../assets/homepage/DSCF0014.png'),
-        require('../assets/homepage/DSCF0112.png')
+        require('../assets/homepage/DSC04149.webp'),
+        require('../assets/homepage/DSC04425.webp'),
+        require('../assets/homepage/DSCF0014.webp'),
+        require('../assets/homepage/DSCF0112.webp')
       ],
       currentImage: 0,
       intervalId: null,
@@ -81,11 +84,16 @@ export default {
   width: 100vw;
   overflow: hidden;
   background: #000;
+  margin: 0;
+  padding: 0;
+  padding-top: 80px;
 }
 .carousel-wrapper {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
   height: 100vh;
   z-index: 1;
@@ -104,6 +112,8 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
   height: 100vh;
   background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.85) 100%);
@@ -111,9 +121,11 @@ export default {
   pointer-events: none;
 }
 .hero-title-wrapper {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -177,5 +189,40 @@ export default {
     margin-top: 0.3rem;
     padding: 0 10px;
   }
+}
+.loader-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  z-index: 10;
+}
+.loader {
+  border: 8px solid #fff;
+  border-top: 8px solid #a8180c;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.bottom-vignette {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;
+  width: 100vw;
+  pointer-events: none;
+  z-index: 4;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 70%, #000 100%);
 }
 </style>

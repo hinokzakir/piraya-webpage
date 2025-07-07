@@ -43,11 +43,11 @@ nav {
 	/* padding: 10px 20px; */
 	background: linear-gradient(180deg, rgba(168,24,12,0.7) 0%, rgba(168,24,12,0.3) 60%, rgba(168,24,12,0) 100%);
 	padding: 10px 20px;
-	position: sticky;
+	position: fixed;
 	top: 0;
 	left: 0;
-	width: auto;
-	z-index: 1000;
+	width: 100vw;
+	z-index: 10000;
 }
 
 ul {

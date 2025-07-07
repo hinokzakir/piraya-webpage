@@ -4,16 +4,25 @@
     <transition name="slide" mode="out-in">
       <router-view />
     </transition>
+    <InfoCardsSection v-if="$route.path === '/'" />
+    <EventsSection v-if="$route.path === '/'" />
+    <SocialLinksSection v-if="$route.path === '/'" />
   </div>
 </template>
 
 <script>
 import MainNavbar from "./components/MainNavbar.vue";
+import InfoCardsSection from "./components/InfoCardsSection.vue";
+import EventsSection from "./components/EventsSection.vue";
+import SocialLinksSection from "./components/SocialLinksSection.vue";
 
 export default {
   name: 'App',
   components: {
-    MainNavbar
+    MainNavbar,
+    InfoCardsSection,
+    EventsSection,
+    SocialLinksSection
   }
 }
 </script>
@@ -25,6 +34,8 @@ body {
 	background-size:auto;
 	background-attachment: fixed;
 	margin: 0;
+	padding: 0;
+	height: 100%;
 }
 
 #app {
@@ -33,6 +44,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #000000;
   align-items: center;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 /* Transition styles */
@@ -52,5 +66,8 @@ body {
 .app-root {
   min-height: 100vh;
   background: #000;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
 }
 </style>
