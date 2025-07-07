@@ -16,56 +16,68 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap');
 
 .landing-container {
-	margin: 20px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 30px;
-	flex-direction: column;
-	border-style: solid;
-	background: rgba(116, 218, 255, 0.5);
-	border-radius: 16px;
-	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-	backdrop-filter: blur(9.5px);
-	-webkit-backdrop-filter: blur(9.5px);
-	border: 1px solid rgba(11, 240, 255, 0.31);
+  min-height: 100vh;
+  background: #000;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 48px 8vw 48px 8vw;
 }
 h1 {
-  color: white;
-  text-shadow: 2px 2px 4px #000000;
+  font-family: 'IM Fell English SC', serif;
+  color: #fff;
+  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  text-align: center;
+  text-shadow: 0 2px 16px #a8180c, 0 1px 0 #000;
+  margin-top: 0;
+  margin-bottom: 32px;
+  letter-spacing: 0.04em;
 }
-
-img {
-	margin: 20px;
-	border-style: solid;
-	border-radius: 16px;
-	border-color: rgb(119, 190, 231);
-}
-
 p {
-  color: white;
-  /*black outline */
-  text-shadow: 2px 2px 4px #000000;
-  /*make the text only be able to be 50% of screen size in width */
-  max-width: 40%;
-  /*center the text */
-  margin: auto;
-  /*add padding */
+  font-family: 'IM Fell English SC', serif;
+  color: #fff;
+  text-shadow: 0 2px 8px #000;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  margin: 0 auto 32px auto;
+  font-size: 1.25rem;
+  line-height: 1.6;
 }
-
+img {
+  margin: 24px 0 0 0;
+  border-radius: 18px;
+  border: 3px solid #a8180c;
+  box-shadow: 0 2px 24px #000a;
+  width: 420px;
+  height: 320px;
+  object-fit: cover;
+  max-width: 90vw;
+}
 @media screen and (max-width: 600px) {
+  .landing-container {
+    padding: 24px 2vw 24px 2vw;
+  }
+  h1 {
+    font-size: clamp(1.2rem, 10vw, 2.2rem);
+    margin-bottom: 18px;
+  }
   p {
-	max-width: 100%;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    max-width: 100%;
   }
   img {
-	width: 300px;
-	height: 200px;
+    width: 90vw;
+    height: 180px;
+    margin-top: 16px;
   }
-	
 }
-
 h3 {
   margin: 40px 0 0;
 }
