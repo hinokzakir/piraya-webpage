@@ -1,8 +1,10 @@
 <template>
-  <MainNavbar />
-  <transition name="slide" mode="out-in">
-	<router-view />
-  </transition>
+  <div class="app-root">
+    <MainNavbar />
+    <transition name="slide" mode="out-in">
+      <router-view />
+    </transition>
+  </div>
 </template>
 
 <script>
@@ -36,7 +38,7 @@ body {
 /* Transition styles */
 .slide-enter-active,
 .slide-leave-active {
-  transition: transform 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
 .slide-enter-from {
@@ -45,5 +47,10 @@ body {
 
 .slide-leave-to {
   transform: translateX(-100%);
+}
+
+.app-root {
+  min-height: 100vh;
+  background: #000;
 }
 </style>

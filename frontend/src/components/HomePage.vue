@@ -1,184 +1,181 @@
 <template>
-	<div class="hello">
-		<div class="landing-container">
-			<div class="landing-text">
-				<div class="title">PIRAYA PARTY PROVIDERS</div>
-				<h1>DET FESTANDE FISKERIET</h1>
-				<p>FÖRSER FESTER TILL UMEÅS DATAVETARE M.FL. SEDAN 1985</p>
-				<p>"VISSA MÄNNISKOR ÄR BÄTTRE ÄN ANDRA" - PIRAYA</p>
-			</div>
-			<div class="landing-image">
-				<img alt="Vue logo" width="500px" height="400px" src="../assets/landing.jpeg">
-			</div>
-		</div>
-		<div class="info-container">
-			<div class="landing-events">
-				<div class="title">NYHETER</div>
-				<iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fpiraya.party.providers&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=1735511459855996" width="500" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-			</div>
-			<div class="landing-events">
-				<div class="title"> KOMMANDE EVENTS</div>
-				<div class="events-container">
-					<template v-for="(event, index) in event" :key="index">
-						<div class="event-card">
-							<h3>{{ event.name }}</h3>
-							<p>{{ event.description }}</p>
-							<p>{{ event.dateStart }}</p>
-							<p>{{ event.dateEnd}}</p>
-						</div>
-					</template>
-				</div>
-			</div>
-		</div>
-	</div>
+  <div class="homepage-root">
+    <div class="carousel-wrapper">
+      <transition-group name="fade" tag="div">
+        <img
+          v-for="(img, idx) in images"
+          v-show="idx === currentImage"
+          :key="img"
+          :src="img"
+          class="carousel-image"
+          alt="carousel"
+        />
+      </transition-group>
+      <div class="background-gradient"></div>
+    </div>
+    <div class="hero-title-wrapper">
+      <h1 class="hero-title">PIRAYA PARTY PROVIDERS</h1>
+      <div class="hero-subtitle">FÖRSER FESTER TILL UMEÅS DATAVETARE M.FL. SEDAN 1985</div>
+    </div>
+    <!-- Här kan du lägga till mer innehåll senare -->
+  </div>
 </template>
 
 <script>
-import eventsData from '../assets/events.json';
-
 export default {
-	name: 'HomePage',
-	data() {
-		return {
-			event: eventsData // Assign imported JSON to `members`
-		};
-	}
-}
+  data() {
+    return {
+      images: [
+        require('../assets/homepage/DSC04149.png'),
+        require('../assets/homepage/DSC04425.png'),
+        require('../assets/homepage/DSCF0014.png'),
+        require('../assets/homepage/DSCF0112.png')
+      ],
+      currentImage: 0,
+      intervalId: null,
+      imagesLoaded: false
+    };
+  },
+  mounted() {
+    // Preload all images
+    this.preloadImages(this.images).then(() => {
+      this.imagesLoaded = true;
+      // Start carousel if more than one image
+      if (this.images.length > 1) {
+        this.intervalId = setInterval(() => {
+          this.currentImage = (this.currentImage + 1) % this.images.length;
+        }, 3000);
+      }
+    });
+  },
+  beforeUnmount() {
+    if (this.intervalId) clearInterval(this.intervalId);
+  },
+  methods: {
+    preloadImages(imageArray) {
+      // Returns a promise that resolves when all images are loaded
+      return Promise.all(
+        imageArray.map(src => {
+          return new Promise(resolve => {
+            const img = new window.Image();
+            img.src = src;
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        })
+      );
+    }
+  }
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Protest+Revolution&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Protest+Revolution&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap');
 
-.title {
-	font-size: 50px;
-	font-weight: 900;
-	color: rgb(161, 20, 20);
-	font-family: "Impact", sans-serif;
-	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-	text-shadow: #000 1px 0 10px;
+.homepage-root {
+  position: relative;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #000;
 }
-
-.landing-container {
-	margin: 20px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 30px;
-	border-style: solid;
-	background: rgba(116, 218, 255, 0.5);
-	border-radius: 16px;
-	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-	backdrop-filter: blur(9.5px);
-	-webkit-backdrop-filter: blur(9.5px);
-	border: 1px solid rgba(11, 240, 255, 0.31);
+.carousel-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
 }
-
-.info-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 30px;
+.carousel-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  opacity: 0.6;
+  transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1);
 }
-
-.landing-events {
-	padding: 30px;
-	border-style: solid;
-	background: rgba(116, 218, 255, 0.5);
-	border-radius: 16px;
-	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-	backdrop-filter: blur(9.5px);
-	-webkit-backdrop-filter: blur(9.5px);
-	border: 1px solid rgba(11, 240, 255, 0.31);
-	margin: 50px;
+.background-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.85) 100%);
+  z-index: 2;
+  pointer-events: none;
 }
-
-.event-container {
-	display: flex;
-	flex-direction: column;
+.hero-title-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  pointer-events: none;
 }
-
-.event-card {
-	margin: 10px;
-	padding: 10px;
-	border-style: solid;
-	border-color: rgb(73, 114, 142);
-	background: rgba(116, 218, 255, 0.5);
-	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-	backdrop-filter: blur(9.5px);
-	-webkit-backdrop-filter: blur(9.5px);
-	border: 1px solid rgba(11, 240, 255, 0.31);
-	border-radius: 16px;
+.hero-title {
+  font-family: 'IM Fell English SC', serif;
+  font-size: clamp(2.5rem, 10vw, 6rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.01em;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow:
+    0 0 8px #fff,
+    0 0 16px #a8180c,
+    0 0 32px #a8180c,
+    0 0 64px #fff,
+    0 2px 8px #000;
+  user-select: none;
 }
-
-.landing-image {
-	border-style: solid;
-	border-color: rgb(73, 114, 142);
-	margin-right: 50px;
-	align-items: center;
+.hero-subtitle {
+  font-family: 'IM Fell English SC', serif;
+  font-size: clamp(1.4rem, 4vw, 2.7rem);
+  color: #fff;
+  text-align: center;
+  margin-top: 0.4rem;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 8px #a8180c,
+    0 1px 4px #000;
+  user-select: none;
 }
-
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
 @media (max-width: 768px) {
-	.landing-container {
-		flex-direction: column;
-		/* Stack items vertically */
-	}
-
-	.landing-events iframe {
-		width: 300px;
-	}
-
-	.landing-events {
-		width: 300px;
-	}
-
-	.landing-image {
-		margin-right: 0;
-	}
-	img {
-		width: 100%;
-		height: auto;
-	}
-	.landing-text {
-		margin-right: 0;
-	}
-	.info-container {
-		flex-direction: column;
-	}
-	.event-container {
-		margin-right: 0;
-	}
-}
-
-h1 {
-	color: white;
-	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-}
-
-p {
-	color: white;
-	text-shadow: #000 1px 0 10px;
-}
-
-.landing-text {
-	margin-right: 100px;
-}
-
-h3 {
-	margin: 40px 0 0;
-}
-
-ul {
-	list-style-type: none;
-	padding: 0;
-}
-
-li {
-	display: inline-block;
-	margin: 0 10px;
-}
-
-a {
-	color: #42b983;
+  .carousel-wrapper,
+  .carousel-image,
+  .background-gradient,
+  .hero-title-wrapper {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100svh;
+    min-width: 100vw;
+  }
+  .hero-title {
+    font-size: clamp(1.5rem, 10vw, 3.5rem);
+    padding: 0 10px;
+  }
+  .hero-subtitle {
+    font-size: clamp(1.2rem, 7vw, 2rem);
+    margin-top: 0.3rem;
+    padding: 0 10px;
+  }
 }
 </style>

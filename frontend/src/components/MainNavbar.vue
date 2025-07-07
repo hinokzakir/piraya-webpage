@@ -37,11 +37,12 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap');
 nav {
-	background: #641818;
+	/* background: #641818; */
+	/* padding: 10px 20px; */
+	background: linear-gradient(180deg, rgba(168,24,12,0.7) 0%, rgba(168,24,12,0.3) 60%, rgba(168,24,12,0) 100%);
 	padding: 10px 20px;
-	background: rgb(117, 59, 59);
-	background: linear-gradient(0deg, rgba(117, 59, 59, 1) 7%, rgba(168, 24, 12, 1) 100%);
 	position: sticky;
 	top: 0;
 	left: 0;
@@ -101,17 +102,19 @@ img {
 
 li {
 	list-style: none;
+	font-family: 'IM Fell English SC', serif;
+	font-size: 1.35em;
 }
 
 a {
 	color: white;
 	text-decoration: none;
-	font-size: 18px;
+	font-size: 1.25em;
+	font-family: 'IM Fell English SC', serif;
 }
 
 a:hover {
-	color: firebrick;
-	background-color: white;
+	text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #fff, 0 0 50px #fff;
 }
 
 /* Menu slide animation */
