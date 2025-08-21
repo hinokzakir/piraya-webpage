@@ -97,14 +97,27 @@
 @media (max-width: 900px) {
   .info-cards {
     flex-direction: column;
-    gap: 24px;
+    gap: 18px;
     align-items: center;
-    margin-top: 32px;
+    margin-top: 24px;
+    padding: 0;
   }
   .info-card {
-    max-width: 95vw;
-    min-width: 0;
-    width: 100%;
+    max-width: 80vw;
+    width: 80vw;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 18px 4px 14px 4px;
+  }
+  .info-cards-title {
+    font-size: clamp(1.1rem, 8vw, 2.2rem);
+    margin-bottom: 18px;
+  }
+  .info-card h3 {
+    font-size: 1.1rem;
+  }
+  .info-card p {
+    font-size: 0.98rem;
   }
 }
 </style> 

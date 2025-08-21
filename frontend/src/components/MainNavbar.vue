@@ -1,5 +1,5 @@
 <template>
-	<nav>
+	<nav :class="{ 'mobile-menu-open': menuOpen }">
 		<ul>
 			<img alt="Vue logo" width="75px" height="75px" src="../assets/logo.png">
 			<div class="hamburger" @click="toggleMenu" :class="{ 'open': menuOpen }">
@@ -9,9 +9,9 @@
 			</div>
 			<transition name="menu-slide">
 				<div class="links" :class="{ 'mobile-active': menuOpen }">
-					<li><router-link to="/" @click="closeMenu">Hem</router-link></li>
-					<li><router-link to="/members" @click="closeMenu">Medlemmar</router-link></li>
-					<li><router-link to="/about" @click="closeMenu">Om oss</router-link></li>
+					<li v-for="(item, idx) in navItems" :key="idx">
+						<router-link :to="item.to" @click="closeMenu">{{ item.label }}</router-link>
+					</li>
 				</div>
 			</transition>
 		</ul>
@@ -22,7 +22,12 @@
 export default {
 	data() {
 		return {
-			menuOpen: false
+			menuOpen: false,
+			navItems: [
+				{ to: '/', label: 'Hem' },
+				{ to: '/members', label: 'Medlemmar' },
+				{ to: '/about', label: 'Om oss' }
+			]
 		}
 	},
 	methods: {
@@ -48,6 +53,13 @@ nav {
 	left: 0;
 	width: 100vw;
 	z-index: 10000;
+	transition: background 0.3s;
+}
+
+nav.mobile-menu-open {
+	background: rgba(168,24,12,0.7) !important;
+	background-image: none !important;
+	transition: background 0.3s;
 }
 
 ul {
@@ -68,7 +80,7 @@ img {
 	display: none;
 	cursor: pointer;
 	margin-left: auto;
-	margin-right: 20px;
+	margin-right: 32px;
 }
 
 .hamburger span {
@@ -120,42 +132,82 @@ a:hover {
 /* Menu slide animation */
 .menu-slide-enter-active,
 .menu-slide-leave-active {
-	transition: all 0.3s ease;
+	transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 
 .menu-slide-enter-from,
 .menu-slide-leave-to {
-	transform: translateY(-100%);
 	opacity: 0;
+	transform: translateY(-30px);
 }
 
 /* Mobile styles */
 @media screen and (max-width: 768px) {
+	nav {
+		height: 70px;
+		padding-top: 18px;
+		padding-bottom: 18px;
+	}
 	.hamburger {
 		display: block;
 	}
 
+	img {
+		display: none;
+	}
+
 	.links {
 		display: none;
-		/* Hidden by default on mobile */
 		position: absolute;
 		top: 100%;
 		left: 0;
 		right: 0;
 		background: rgb(117, 59, 59);
 		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 		margin: 0;
-		padding: 20px;
-		border-radius: 0 0 10px 10px;
+		padding: 30px 0 30px 0;
+		border-radius: 0 0 16px 16px;
+		min-height: 0;
+		transition: min-height 0.4s cubic-bezier(0.4,0,0.2,1), background 0.3s;
+		overflow: hidden;
 	}
 
 	.links.mobile-active {
 		display: flex;
-		/* Show when menu is open */
+		min-height: 300px;
+		background: rgba(168,24,12,0.7) !important;
+		background-image: none !important;
+		transition: min-height 0.4s cubic-bezier(0.4,0,0.2,1), background 0.3s;
 	}
 
-	li {
-		margin: 10px 0;
+	.links li {
+		margin: 18px 0;
+		width: 100%;
+		text-align: center;
+		transition: opacity 0.3s, transform 0.3s;
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.links:not(.mobile-active) li {
+		opacity: 0;
+		transform: translateY(-20px);
+		pointer-events: none;
+	}
+
+	a {
+		font-size: 1.5em;
+		padding: 12px 0;
+		width: 100%;
+		display: block;
+	}
+
+	img {
+		height: 40px;
+		width: 40px;
+		margin-left: 8px;
 	}
 }
 </style>

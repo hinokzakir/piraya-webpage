@@ -30,7 +30,6 @@ export default {
 <style>
 body {
 	background-color: rgb(74, 34, 34);
-	background-image: url("https://www.cardiff.ac.uk/__data/assets/image/0005/981878/GettyImages-817621116.jpg")/* url("./assets/bg2.jpeg")*/;
 	background-size:auto;
 	background-attachment: fixed;
 	margin: 0;

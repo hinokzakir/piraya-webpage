@@ -113,19 +113,29 @@ p {
 
 @media (max-width: 600px) {
 	.members-container {
-		padding: 16px 2vw 16px 2vw;
-		gap: 18px;
+		padding: 4px 0 4px 0;
+		gap: 12px;
 	}
 	.member-card {
-		padding: 18px 4px 14px 4px;
+		max-width: 80vw;
+		width: 80vw;
+		margin: 0 auto;
+		box-sizing: border-box;
+		padding: 12px 2px 10px 2px;
 	}
 	.member-image {
-		width: 80px;
-		height: 80px;
+		width: 60px;
+		height: 60px;
 	}
 	h1 {
-		font-size: clamp(1.2rem, 10vw, 2.2rem);
-		margin-bottom: 18px;
+		font-size: clamp(1rem, 8vw, 1.5rem);
+		margin-bottom: 10px;
+	}
+	h2 {
+		font-size: 1rem;
+	}
+	p {
+		font-size: 0.95rem;
 	}
 }
 </style>

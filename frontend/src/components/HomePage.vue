@@ -29,9 +29,9 @@ export default {
   data() {
     return {
       images: [
-        require('../assets/homepage/DSC04149.webp'),
+        require('../assets/homepage/SAM_0419.webp'),
         require('../assets/homepage/DSC04425.webp'),
-        require('../assets/homepage/DSCF0014.webp'),
+        require('../assets/homepage/SAM_0452.webp'),
         require('../assets/homepage/DSCF0112.webp')
       ],
       currentImage: 0,
@@ -181,11 +181,12 @@ export default {
     min-width: 100vw;
   }
   .hero-title {
-    font-size: clamp(1.5rem, 10vw, 3.5rem);
-    padding: 0 10px;
+    font-size: clamp(1rem, 6vw, 1.5rem);
+    padding: 0 4px;
+    word-break: break-word;
   }
   .hero-subtitle {
-    font-size: clamp(1.2rem, 7vw, 2rem);
+    font-size: clamp(0.8rem, 4vw, 1.1rem);
     margin-top: 0.3rem;
     padding: 0 10px;
   }

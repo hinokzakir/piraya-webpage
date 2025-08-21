@@ -62,7 +62,15 @@
 @media (max-width: 600px) {
   .social-links {
     flex-direction: column;
-    gap: 24px;
+    gap: 18px;
+  }
+  .social-title {
+    font-size: clamp(1.1rem, 8vw, 2.2rem);
+    margin-bottom: 18px;
+  }
+  .social-link {
+    font-size: 1.1rem;
+    padding: 10px 0;
   }
 }
 </style> 

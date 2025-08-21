@@ -115,14 +115,14 @@ export default {
   background: linear-gradient(135deg, rgba(168,24,12,0.95) 0%, rgba(220,60,40,0.85) 100%);
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.45);
-  padding: 48px 36px 36px 36px;
+  padding: 24px 18px 18px 18px;
   min-width: 300px;
   max-width: 480px;
   flex: 1 1 340px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   color: #fff;
   font-family: 'IM Fell English SC', serif;
   transition: transform 0.2s;
@@ -133,7 +133,7 @@ export default {
 }
 .event-card-content h3 {
   font-size: 1.7rem;
-  margin-bottom: 0.5em;
+  margin-bottom: 0.2em;
   color: #fff;
   font-family: 'IM Fell English SC', serif;
   letter-spacing: 0.04em;
@@ -141,24 +141,43 @@ export default {
 .event-date {
   color: #111;
   font-size: 1.1rem;
-  margin-bottom: 0.5em;
+  margin-bottom: 0.2em;
 }
 .event-desc {
   font-size: 1.05rem;
   color: #fff;
   font-family: 'IM Fell English SC', serif;
   margin: 0;
+  margin-bottom: 0.1em;
 }
 @media (max-width: 900px) {
   .events-cards {
     flex-direction: column;
-    gap: 24px;
+    gap: 10px;
     align-items: center;
+    padding: 0;
   }
   .event-card {
-    max-width: 98vw;
-    min-width: 0;
-    width: 100%;
+    max-width: 80vw;
+    width: 80vw;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 10px 4px 8px 4px;
+    align-items: center;
+    text-align: center;
+    flex: 0 0 auto;
+  }
+  .events-title {
+    font-size: clamp(1.1rem, 8vw, 2.2rem);
+    margin-bottom: 12px;
+  }
+  .event-card-content h3 {
+    font-size: 1rem;
+    margin-bottom: 0.3em;
+  }
+  .event-card p, .event-date {
+    font-size: 0.92rem;
+    margin-bottom: 0.2em;
   }
 }
 </style> 
