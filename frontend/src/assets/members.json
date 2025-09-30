@@ -17,10 +17,10 @@
 	},
 	{
 		"Smeknamn": "Affe",
-		"Namn": "REDACTED",
+		"Namn": "Hinok Zakir Saleh",
 		"Roll": "XSP",
 		"quote": "Jag svär jag pissade två gånger",
-		"bild": "member_img/redacted.jpg",
+		"bild": "member_img/affe.png",
 		"telefonnummer": "0720122851"
 	},
 	{
@@ -122,7 +122,7 @@
 	{
 		"Smeknamn": "Dessi",
 		"Namn": "Sofia Westman",
-		"Roll": "",
+		"Roll": "Sektreterare",
 		"quote": "Ta ut ballarna ur munnen",
 		"bild": "member_img/dessi.jpg",
 		"telefonnummer": "0702206902"
@@ -130,25 +130,25 @@
 	{
 		"Smeknamn": "Mange",
 		"Namn": "Tiffany Jansson",
-		"Roll": "",
+		"Roll": "Sektreterare",
 		"quote": "Jag har sovit i 12 timmar, klart jag är uppe och yappar.",
-		"bild": "member_img/redacted.jpg",
+		"bild": "member_img/mange.jpg",
 		"telefonnummer": "0736799007"
 	},
 	{
 		"Smeknamn": "Tesco",
-		"Namn": "REDACTED",
-		"Roll": "",
+		"Namn": "Henrique Röbäck Fiusa",
+		"Roll": "Kommunikationsansvarig",
 		"quote": "Min kuk är som en legend, ingen har sett de",
-		"bild": "member_img/redacted.jpg",
+		"bild": "member_img/tesco.jpg",
 		"telefonnummer": "0723332939"
 	},
 	{
 		"Smeknamn": "KZ",
-		"Namn": "REDACTED",
-		"Roll": "",
+		"Namn": "Jonathan Davidsen",
+		"Roll": "Socialmediaansvarig",
 		"quote": "Jag är gluten",
-		"bild": "member_img/redacted.jpg",
+		"bild": "member_img/kz.jpg",
 		"telefonnummer": "0727252208"
 	}
 ]
