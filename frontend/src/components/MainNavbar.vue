@@ -1,5 +1,5 @@
 <template>
-	<nav>
+	<nav :class="{ 'mobile-menu-open': menuOpen }">
 		<ul>
 			<img alt="Vue logo" width="75px" height="75px" src="../assets/logo.png">
 			<div class="hamburger" @click="toggleMenu" :class="{ 'open': menuOpen }">
@@ -9,9 +9,9 @@
 			</div>
 			<transition name="menu-slide">
 				<div class="links" :class="{ 'mobile-active': menuOpen }">
-					<li><router-link to="/" @click="closeMenu">Hem</router-link></li>
-					<li><router-link to="/members" @click="closeMenu">Medlemmar</router-link></li>
-					<li><router-link to="/about" @click="closeMenu">Om oss</router-link></li>
+					<li v-for="(item, idx) in navItems" :key="idx">
+						<router-link :to="item.to" @click="closeMenu">{{ item.label }}</router-link>
+					</li>
 				</div>
 			</transition>
 		</ul>
@@ -22,7 +22,12 @@
 export default {
 	data() {
 		return {
-			menuOpen: false
+			menuOpen: false,
+			navItems: [
+				{ to: '/', label: 'Hem' },
+				{ to: '/members', label: 'Medlemmar' },
+				{ to: '/about', label: 'Om oss' }
+			]
 		}
 	},
 	methods: {
@@ -37,16 +42,24 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap');
 nav {
-	background: #641818;
+	/* background: #641818; */
+	/* padding: 10px 20px; */
+	background: linear-gradient(180deg, rgba(168,24,12,0.7) 0%, rgba(168,24,12,0.3) 60%, rgba(168,24,12,0) 100%);
 	padding: 10px 20px;
-	background: rgb(117, 59, 59);
-	background: linear-gradient(0deg, rgba(117, 59, 59, 1) 7%, rgba(168, 24, 12, 1) 100%);
-	position: sticky;
+	position: fixed;
 	top: 0;
 	left: 0;
-	width: auto;
-	z-index: 1000;
+	width: 100vw;
+	z-index: 10000;
+	transition: background 0.3s;
+}
+
+nav.mobile-menu-open {
+	background: rgba(168,24,12,0.7) !important;
+	background-image: none !important;
+	transition: background 0.3s;
 }
 
 ul {
@@ -67,7 +80,7 @@ img {
 	display: none;
 	cursor: pointer;
 	margin-left: auto;
-	margin-right: 20px;
+	margin-right: 32px;
 }
 
 .hamburger span {
@@ -101,58 +114,100 @@ img {
 
 li {
 	list-style: none;
+	font-family: 'IM Fell English SC', serif;
+	font-size: 1.35em;
 }
 
 a {
 	color: white;
 	text-decoration: none;
-	font-size: 18px;
+	font-size: 1.25em;
+	font-family: 'IM Fell English SC', serif;
 }
 
 a:hover {
-	color: firebrick;
-	background-color: white;
+	text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #fff, 0 0 50px #fff;
 }
 
 /* Menu slide animation */
 .menu-slide-enter-active,
 .menu-slide-leave-active {
-	transition: all 0.3s ease;
+	transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 
 .menu-slide-enter-from,
 .menu-slide-leave-to {
-	transform: translateY(-100%);
 	opacity: 0;
+	transform: translateY(-30px);
 }
 
 /* Mobile styles */
 @media screen and (max-width: 768px) {
+	nav {
+		height: 70px;
+		padding-top: 18px;
+		padding-bottom: 18px;
+	}
 	.hamburger {
 		display: block;
 	}
 
+	img {
+		display: none;
+	}
+
 	.links {
 		display: none;
-		/* Hidden by default on mobile */
 		position: absolute;
 		top: 100%;
 		left: 0;
 		right: 0;
 		background: rgb(117, 59, 59);
 		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 		margin: 0;
-		padding: 20px;
-		border-radius: 0 0 10px 10px;
+		padding: 30px 0 30px 0;
+		border-radius: 0 0 16px 16px;
+		min-height: 0;
+		transition: min-height 0.4s cubic-bezier(0.4,0,0.2,1), background 0.3s;
+		overflow: hidden;
 	}
 
 	.links.mobile-active {
 		display: flex;
-		/* Show when menu is open */
+		min-height: 300px;
+		background: rgba(168,24,12,0.7) !important;
+		background-image: none !important;
+		transition: min-height 0.4s cubic-bezier(0.4,0,0.2,1), background 0.3s;
 	}
 
-	li {
-		margin: 10px 0;
+	.links li {
+		margin: 18px 0;
+		width: 100%;
+		text-align: center;
+		transition: opacity 0.3s, transform 0.3s;
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.links:not(.mobile-active) li {
+		opacity: 0;
+		transform: translateY(-20px);
+		pointer-events: none;
+	}
+
+	a {
+		font-size: 1.5em;
+		padding: 12px 0;
+		width: 100%;
+		display: block;
+	}
+
+	img {
+		height: 40px;
+		width: 40px;
+		margin-left: 8px;
 	}
 }
 </style>

@@ -1,16 +1,32 @@
 [
 	{
-		"Smeknamn": "Affe",
-		"Namn": "Hinok Zakir Saleh",
+		"Smeknamn": "Findus",
+		"Namn": "Samuel Johansson",
 		"Roll": "SP",
+		"quote": "Köpte du 2 ciggpack? 3.",
+		"bild": "member_img/findus.jpg",
+		"telefonnummer": "0725507724"
+	},
+	{
+		"Smeknamn": "Torkel",
+		"Namn": "Vincent Öhlund",
+		"Roll": "SID",
+		"quote": "Låt inte gamla vanor vara stopp för nya banor",
+		"bild": "member_img/torkel.jpg",
+		"telefonnummer": "0706800527"
+	},
+	{
+		"Smeknamn": "Affe",
+		"Namn": "REDACTED",
+		"Roll": "XSP",
 		"quote": "Jag svär jag pissade två gånger",
-		"bild": "member_img/affe.png",
+		"bild": "member_img/redacted.jpg",
 		"telefonnummer": "0720122851"
 	},
 	{
 		"Smeknamn": "Räkan",
 		"Namn": "Rickard Hellqvist Collins",
-		"Roll": "SID",
+		"Roll": "XSID",
 		"quote": "En vinnare är en förlorare som försökte en gång till.",
 		"bild": "member_img/rakan.jpg",
 		"telefonnummer": "0706176126"
@@ -18,39 +34,15 @@
 	{
 		"Smeknamn": "Hans",
 		"Namn": "Teodor Bäckström",
-		"Roll": "XSP",
+		"Roll": "XXSP",
 		"quote": "Jag är full, men det är ingen fara",
 		"bild": "member_img/hans.jpg",
 		"telefonnummer": "0702981918"
 	},
 	{
-		"Smeknamn": "Otto",
-		"Namn": "Oskar By",
-		"Roll": "XSID",
-		"quote": "DL skriv ett citat på mig",
-		"bild": "member_img/otto.jpg",
-		"telefonnummer": "0730489667"
-	},
-	{
-		"Smeknamn": "Nilf",
-		"Namn": "William Nilsson",
-		"Roll": "XXSP",
-		"quote": "Jag har ju varit president längre än Magdalena Andersson varit stadsminister",
-		"bild": "member_img/nilf.jpg",
-		"telefonnummer": "0761421838"
-	},
-	{
-		"Smeknamn": "VB",
-		"Namn": "Jacob Jerkérus",
-		"Roll": "XXSP",
-		"quote": "Fan jag ska upp 9 imorn för att träffa min kyrkoherde",
-		"bild": "member_img/vb.png",
-		"telefonnummer": "0768275454"
-	},
-	{
 		"Smeknamn": "Grämmel",
 		"Namn": "Joar Eliasson",
-		"Roll": "XXXSP",
+		"Roll": "XXXXSP",
 		"quote": "Om linsen fastnar bakom ögat skiter man ut den ju",
 		"bild": "member_img/grammel.jpg",
 		"telefonnummer": "0762556955"
@@ -104,14 +96,6 @@
 		"telefonnummer": "725210557"
 	},
 	{
-		"Smeknamn": "Findus",
-		"Namn": "Samuel Johansson",
-		"Roll": "Brewmaster",
-		"quote": "Köpte du 2 ciggpack? 3.",
-		"bild": "member_img/findus.jpg",
-		"telefonnummer": "0725507724"
-	},
-	{
 		"Smeknamn": "Bamse",
 		"Namn": "Carl Svärd",
 		"Roll": "",
@@ -126,14 +110,6 @@
 		"quote": "Han är väldigt feminin, det kan man vara även när man är nykter",
 		"bild": "member_img/baggen.jpg",
 		"telefonnummer": "0761122072"
-	},
-	{
-		"Smeknamn": "Torkel",
-		"Namn": "Vincent Öhlund",
-		"Roll": "",
-		"quote": "Låt inte gamla vanor vara stopp för nya banor",
-		"bild": "member_img/torkel.jpg",
-		"telefonnummer": "0706800527"
 	},
 	{
 		"Smeknamn": "Åke",
@@ -156,23 +132,23 @@
 		"Namn": "Tiffany Jansson",
 		"Roll": "",
 		"quote": "Jag har sovit i 12 timmar, klart jag är uppe och yappar.",
-		"bild": "member_img/mange.jpg",
+		"bild": "member_img/redacted.jpg",
 		"telefonnummer": "0736799007"
 	},
 	{
 		"Smeknamn": "Tesco",
-		"Namn": "Henrique Röbäck Fiusa",
+		"Namn": "REDACTED",
 		"Roll": "",
 		"quote": "Min kuk är som en legend, ingen har sett de",
-		"bild": "member_img/tesco.jpg",
+		"bild": "member_img/redacted.jpg",
 		"telefonnummer": "0723332939"
 	},
 	{
 		"Smeknamn": "KZ",
-		"Namn": "Jonathan Davidsson",
+		"Namn": "REDACTED",
 		"Roll": "",
 		"quote": "Jag är gluten",
-		"bild": "member_img/kz.jpg",
+		"bild": "member_img/redacted.jpg",
 		"telefonnummer": "0727252208"
 	}
 ]
