@@ -82,7 +82,7 @@
 	{
 		"Smeknamn": "Hooga",
 		"Namn": "Hugo Hultén",
-		"Roll": "BunkerAnsvarig",
+		"Roll": "",
 		"quote": "Om jag inte vaknar upp skakandes har jag inte haft en bra kväll.",
 		"bild": "member_img/hooga.jpg",
 		"telefonnummer": "0702800760"
@@ -106,7 +106,7 @@
 	{
 		"Smeknamn": "Baggen",
 		"Namn": "Tage Lindekrantz",
-		"Roll": "",
+		"Roll": "Bunkeransvarig",
 		"quote": "Han är väldigt feminin, det kan man vara även när man är nykter",
 		"bild": "member_img/baggen.jpg",
 		"telefonnummer": "0761122072"
@@ -122,7 +122,7 @@
 	{
 		"Smeknamn": "Dessi",
 		"Namn": "Sofia Westman",
-		"Roll": "Sektreterare",
+		"Roll": "Webmaster",
 		"quote": "Ta ut ballarna ur munnen",
 		"bild": "member_img/dessi.jpg",
 		"telefonnummer": "0702206902"
