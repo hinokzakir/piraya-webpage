@@ -150,5 +150,29 @@
 		"quote": "Jag är gluten",
 		"bild": "member_img/kz.jpg",
 		"telefonnummer": "0727252208"
+	},
+	{
+		"Smeknamn": "Quavo",
+		"Namn": "Andreas Körkkö",
+		"Roll": "",
+		"quote": "Säger inget roligt",
+		"bild": "member_img/quavo.jpeg",
+		"telefonnummer": "0727185818"
+	},
+	{
+		"Smeknamn": "Kenny",
+		"Namn": "Iris Thungren",
+		"Roll": "",
+		"quote": "Säger inget roligt",
+		"bild": "member_img/kenny.jpeg",
+		"telefonnummer": "0703861011"
+	},
+	{
+		"Smeknamn": "Kajdos",
+		"Namn": "Hannes Nilsson",
+		"Roll": "",
+		"quote": "Säger inget roligt",
+		"bild": "member_img/kajdos.jpeg",
+		"telefonnummer": "0739295632"
 	}
 ]
