@@ -18,7 +18,7 @@
 <script>
 import { ref, onMounted } from 'vue';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 
 function toDate(ts) {
   // Firestore timestamp till JS Date
@@ -39,7 +39,12 @@ export default {
       loading.value = true;
       error.value = false;
       try {
-        const q = query(collection(db, 'events'), orderBy('startDate', 'asc'));
+        const now = new Date();
+        const q = query(
+          collection(db, 'events'),
+          where('startDate', '>=', now),
+          orderBy('startDate', 'asc')
+        );
         const querySnapshot = await getDocs(q);
         events.value = querySnapshot.docs.map(doc => {
           const data = doc.data();
@@ -180,4 +185,4 @@ export default {
     margin-bottom: 0.2em;
   }
 }
-</style> 
+</style>
