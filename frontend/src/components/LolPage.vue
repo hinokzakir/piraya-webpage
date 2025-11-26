@@ -7,6 +7,56 @@
         <div class="box-content" v-html="section.content"></div>
       </div>
     </div>
+
+    <!-- Tournament Bracket -->
+    <div class="bracket-section">
+      <h2 class="bracket-title">Turnerings Bracket</h2>
+      <div class="bracket-container">
+        <!-- Round of 16 -->
+        <div class="bracket-round round-of-16">
+          <div class="round-label">Åttondelsfinaler</div>
+          <div class="match" v-for="(match, i) in bracket.roundOf16" :key="'r16-' + i">
+            <div class="team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
+            <div class="team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+          </div>
+        </div>
+
+        <!-- Quarter Finals -->
+        <div class="bracket-round quarter-finals">
+          <div class="round-label">Kvartsfinaler</div>
+          <div class="match" v-for="(match, i) in bracket.quarterFinals" :key="'qf-' + i">
+            <div class="team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
+            <div class="team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+          </div>
+        </div>
+
+        <!-- Semi Finals -->
+        <div class="bracket-round semi-finals">
+          <div class="round-label">Semifinaler</div>
+          <div class="match" v-for="(match, i) in bracket.semiFinals" :key="'sf-' + i">
+            <div class="team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
+            <div class="team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+          </div>
+        </div>
+
+        <!-- Final -->
+        <div class="bracket-round final">
+          <div class="round-label">Final (BO3)</div>
+          <div class="match final-match">
+            <div class="team" :class="{ winner: bracket.final.winner === 1 }">{{ bracket.final.team1 }}</div>
+            <div class="team" :class="{ winner: bracket.final.winner === 2 }">{{ bracket.final.team2 }}</div>
+          </div>
+        </div>
+
+        <!-- Champion -->
+        <div class="bracket-round champion">
+          <div class="round-label">🏆 Mästare</div>
+          <div class="champion-box">
+            <div class="champion-name">{{ bracket.champion }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -15,6 +65,36 @@ export default {
   name: 'LolPage',
   data() {
     return {
+      // Tournament bracket data - easy to update with team names
+      bracket: {
+        // Round of 16 (8 matches)
+        roundOf16: [
+          { team1: 'Lag 1', team2: 'Lag 2', winner: null },
+          { team1: 'Lag 3', team2: 'Lag 4', winner: null },
+          { team1: 'Lag 5', team2: 'Lag 6', winner: null },
+          { team1: 'Lag 7', team2: 'Lag 8', winner: null },
+          { team1: 'Lag 9', team2: 'Lag 10', winner: null },
+          { team1: 'Lag 11', team2: 'Lag 12', winner: null },
+          { team1: 'Lag 13', team2: 'Lag 14', winner: null },
+          { team1: 'Lag 15', team2: 'Lag 16', winner: null }
+        ],
+        // Quarter Finals (4 matches)
+        quarterFinals: [
+          { team1: 'TBD', team2: 'TBD', winner: null },
+          { team1: 'TBD', team2: 'TBD', winner: null },
+          { team1: 'TBD', team2: 'TBD', winner: null },
+          { team1: 'TBD', team2: 'TBD', winner: null }
+        ],
+        // Semi Finals (2 matches)
+        semiFinals: [
+          { team1: 'TBD', team2: 'TBD', winner: null },
+          { team1: 'TBD', team2: 'TBD', winner: null }
+        ],
+        // Final (1 match - BO3)
+        final: { team1: 'TBD', team2: 'TBD', winner: null },
+        // Champion
+        champion: 'TBD'
+      },
       sections: [
         {
           title: 'Tid och plats',
@@ -253,6 +333,203 @@ h1 {
 
   .box-content {
     font-size: 0.95rem;
+  }
+}
+
+/* Tournament Bracket Styles */
+.bracket-section {
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 64px;
+  padding: 32px;
+  background: rgba(20, 20, 20, 0.92);
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.45);
+}
+
+.bracket-title {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 2rem;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 16px #a8180c, 0 1px 0 #000;
+  margin-top: 0;
+  margin-bottom: 32px;
+  letter-spacing: 0.04em;
+}
+
+.bracket-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 16px 0;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 160px;
+}
+
+.round-label {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 1rem;
+  color: #a8180c;
+  text-align: center;
+  margin-bottom: 8px;
+  text-shadow: 0 1px 4px #000;
+  font-weight: bold;
+}
+
+.match {
+  background: rgba(40, 40, 40, 0.9);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #333;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.match:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px #a8180c44;
+}
+
+.team {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 0.9rem;
+  color: #ccc;
+  padding: 10px 12px;
+  border-bottom: 1px solid #444;
+  transition: background 0.2s, color 0.2s;
+}
+
+.team:last-child {
+  border-bottom: none;
+}
+
+.team.winner {
+  background: linear-gradient(90deg, #a8180c 0%, #d42010 100%);
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Round of 16 spacing */
+.round-of-16 .match {
+  margin-bottom: 0;
+}
+
+/* Quarter Finals spacing */
+.quarter-finals {
+  justify-content: space-around;
+}
+
+.quarter-finals .match {
+  margin-bottom: 48px;
+}
+
+.quarter-finals .match:last-child {
+  margin-bottom: 0;
+}
+
+/* Semi Finals spacing */
+.semi-finals {
+  justify-content: space-around;
+}
+
+.semi-finals .match {
+  margin-bottom: 120px;
+}
+
+.semi-finals .match:last-child {
+  margin-bottom: 0;
+}
+
+/* Final styling */
+.final-match {
+  border: 2px solid #a8180c;
+  box-shadow: 0 0 20px #a8180c44;
+}
+
+.final-match .team {
+  font-size: 1rem;
+  padding: 14px 16px;
+}
+
+/* Champion styling */
+.champion {
+  align-items: center;
+}
+
+.champion-box {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb700 50%, #ffd700 100%);
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(255, 215, 0, 0.4);
+  border: 2px solid #fff;
+}
+
+.champion-name {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 1.2rem;
+  color: #000;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+}
+
+/* Mobile responsive */
+@media (max-width: 1100px) {
+  .bracket-container {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bracket-round {
+    margin-bottom: 32px;
+  }
+
+  .quarter-finals .match,
+  .semi-finals .match {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 700px) {
+  .bracket-section {
+    padding: 16px;
+    margin-top: 32px;
+  }
+
+  .bracket-title {
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+  }
+
+  .bracket-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bracket-round {
+    min-width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .match {
+    max-width: 100%;
+  }
+
+  .team {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+
+  .quarter-finals .match,
+  .semi-finals .match {
+    margin-bottom: 8px;
   }
 }
 </style>
