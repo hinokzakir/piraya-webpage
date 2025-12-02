@@ -16,8 +16,8 @@
         <div class="bracket-round round-of-16">
           <div class="round-label">Åttondelsfinaler</div>
           <div class="match" v-for="(match, i) in bracket.roundOf16" :key="'r16-' + i">
-            <div class="team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
-            <div class="team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -25,8 +25,8 @@
         <div class="bracket-round quarter-finals">
           <div class="round-label">Kvartsfinaler</div>
           <div class="match" v-for="(match, i) in bracket.quarterFinals" :key="'qf-' + i">
-            <div class="team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
-            <div class="team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -34,8 +34,8 @@
         <div class="bracket-round semi-finals">
           <div class="round-label">Semifinaler</div>
           <div class="match" v-for="(match, i) in bracket.semiFinals" :key="'sf-' + i">
-            <div class="team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
-            <div class="team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -43,8 +43,8 @@
         <div class="bracket-round final">
           <div class="round-label">Final (BO3)</div>
           <div class="match final-match">
-            <div class="team" :class="{ winner: bracket.final.winner === 1 }">{{ bracket.final.team1 }}</div>
-            <div class="team" :class="{ winner: bracket.final.winner === 2 }">{{ bracket.final.team2 }}</div>
+            <div class="team blue-team" :class="{ winner: bracket.final.winner === 1 }">{{ bracket.final.team1 }}</div>
+            <div class="team red-team" :class="{ winner: bracket.final.winner === 2 }">{{ bracket.final.team2 }}</div>
           </div>
         </div>
 
@@ -69,14 +69,14 @@ export default {
       bracket: {
         // Round of 16 (8 matches)
         roundOf16: [
-          { team1: 'Lag 1', team2: 'Lag 2', winner: null },
-          { team1: 'Lag 3', team2: 'Lag 4', winner: null },
-          { team1: 'Lag 5', team2: 'Lag 6', winner: null },
-          { team1: 'Lag 7', team2: 'Lag 8', winner: null },
-          { team1: 'Lag 9', team2: 'Lag 10', winner: null },
-          { team1: 'Lag 11', team2: 'Lag 12', winner: null },
-          { team1: 'Lag 13', team2: 'Lag 14', winner: null },
-          { team1: 'Lag 15', team2: 'Lag 16', winner: null }
+          { team1: 'The Wizards of Cz', team2: 'FF15', winner: null },
+          { team1: 'Jontes Änglar', team2: 'Baron breewster', winner: null },
+          { team1: 'INTedgers', team2: 'Grit Gaming', winner: null },
+          { team1: 'SVP Jihad', team2: 'Oskars gossar', winner: null },
+          { team1: 'Data Party (Freakoff)', team2: 'svep67', winner: null },
+          { team1: 'TeamKadeem', team2: 'Larkers Segjärn', winner: null },
+          { team1: 'Poppyprovider', team2: 'airfryerGroup', winner: null },
+          { team1: 'Pappas lena händer', team2: 'SkibidiHuzzlers', winner: null }
         ],
         // Quarter Finals (4 matches)
         quarterFinals: [
@@ -404,16 +404,38 @@ h1 {
   padding: 10px 12px;
   border-bottom: 1px solid #444;
   transition: background 0.2s, color 0.2s;
+  position: relative;
 }
 
 .team:last-child {
   border-bottom: none;
 }
 
+/* Blue team (left/home) */
+.team.blue-team {
+  border-left: 4px solid #1e90ff;
+  background: linear-gradient(90deg, rgba(30, 144, 255, 0.15) 0%, transparent 100%);
+}
+
+/* Red team (right/away) */
+.team.red-team {
+  border-left: 4px solid #dc3545;
+  background: linear-gradient(90deg, rgba(220, 53, 69, 0.15) 0%, transparent 100%);
+}
+
 .team.winner {
-  background: linear-gradient(90deg, #a8180c 0%, #d42010 100%);
-  color: #fff;
   font-weight: bold;
+  color: #fff;
+}
+
+.team.blue-team.winner {
+  background: linear-gradient(90deg, #1e90ff 0%, #4169e1 100%);
+  border-left-color: #4169e1;
+}
+
+.team.red-team.winner {
+  background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+  border-left-color: #c82333;
 }
 
 /* Round of 16 spacing */
