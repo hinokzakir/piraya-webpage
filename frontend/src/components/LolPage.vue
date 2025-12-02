@@ -1,6 +1,13 @@
 <template>
   <div class="lol-container">
     <h1>League Of Legends Turneringen</h1>
+    <div class="warning-banner">
+      <strong>VIKTIGT:</strong> Matcher kan börja tidigare eller senare än schemalagt beroende på hur matcherna går. Ha koll på Discord-servern och streamen för uppdateringar!
+    </div>
+    <div class="subtitle">
+      PRISERNA FÖR TURNERINGEN ÄR:<br> 1:a plats: 1500kr till laget<br> 2:a plats: 500kr till laget<br> Best Highlight: 300kr till lag- eller soloplay.
+    </div>
+    <h2 class="bracket-title">FAQ</h2>
     <div class="info-boxes">
       <div class="info-box" v-for="(section, index) in sections" :key="index">
         <h2>{{ section.title }}</h2>
@@ -69,12 +76,12 @@ export default {
       bracket: {
         // Round of 16 (8 matches)
         roundOf16: [
-          { team1: 'The Wizards of Cz', team2: 'FF15', winner: null },
+          { team1: 'TeamKadeem', team2: 'FF15', winner: null },
           { team1: 'Jontes Änglar', team2: 'Baron breewster', winner: null },
           { team1: 'INTedgers', team2: 'Grit Gaming', winner: null },
           { team1: 'SVP Jihad', team2: 'Oskars gossar', winner: null },
           { team1: 'Data Party (Freakoff)', team2: 'svep67', winner: null },
-          { team1: 'TeamKadeem', team2: 'Larkers Segjärn', winner: null },
+          { team1: 'The Wizards of Cz', team2: 'Larkers Segjärn', winner: null },
           { team1: 'Poppyprovider', team2: 'airfryerGroup', winner: null },
           { team1: 'Pappas lena händer', team2: 'SkibidiHuzzlers', winner: null }
         ],
@@ -167,6 +174,33 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap');
+
+.subtitle {
+  width: 100%;
+  max-width: 99%;
+  padding-top: 2%;
+  padding-bottom: 2%;
+  border-radius: 18px;
+  margin-bottom: 32px;
+  color: #e0e0e0;
+  font-size: 1.8rem;
+  text-align: center;
+  font-family: 'IM Fell English SC', serif;
+  background-color: #a8180c;
+  background: rgba(20, 20, 20, 0.92);
+  text-shadow: 0 2px 16px #000000, 1 1px 0 #000;
+}
+
+.warning-banner {
+  background: #e3eb05;
+  color: #000000;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: 'IM Fell English SC', serif;
+  margin-bottom: 24px;
+  text-align: center;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.45);
+}
 
 .lol-container {
   min-height: 100vh;
