@@ -7,6 +7,17 @@
     <div class="subtitle">
       PRISERNA FÖR TURNERINGEN ÄR:<br> 1:a plats: 1500kr till laget<br> 2:a plats: 500kr till laget<br> Best Highlight: 300kr till lag- eller soloplay.
     </div>
+    <div class="subtitle">
+      Klicka här för vår discord server och twitch!<br><br>
+      <div class="button-container">
+        <a href="https://discord.gg/QUQTannz" target="_blank" class="discord-btn">
+          <img src="https://logos-world.net/wp-content/uploads/2020/12/Discord-Logo.png" height="110px" width="200px" alt="Discord" class="icon" />
+        </a>
+        <a href="https://twitch.tv/pirayagamingproviders" target="_blank" class="twitch-btn">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/Twitch_BlackLogo.svg" height="80px" width="200px" alt="Twitch"  class="icon" />
+        </a>
+      </div>
+    </div>
     <h2 class="bracket-title">FAQ</h2>
     <div class="info-boxes">
       <div class="info-box" v-for="(section, index) in sections" :key="index">
@@ -210,6 +221,11 @@ export default {
   flex-direction: column;
   align-items: center;
 }
+
+.button-container {
+  gap: 100px;
+}
+  
 
 h1 {
   font-family: 'IM Fell English SC', serif;
