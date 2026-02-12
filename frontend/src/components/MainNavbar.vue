@@ -27,7 +27,7 @@ export default {
 				{ to: '/', label: 'Hem' },
 				{ to: '/members', label: 'Medlemmar' },
 				{ to: '/about', label: 'Om oss' },
-				{ to: '/lol', label: 'LOL-turnering' }
+				{ to: '/os', label: 'OS' }
 			]
 		}
 	},

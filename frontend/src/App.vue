@@ -29,7 +29,7 @@ export default {
 
 <style>
 body {
-	background-color: rgb(74, 34, 34);
+	background-color: rgb(0, 0, 0);
 	background-size:auto;
 	background-attachment: fixed;
 	margin: 0;

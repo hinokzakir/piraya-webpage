@@ -34,8 +34,9 @@
         <div class="bracket-round round-of-16">
           <div class="round-label">Åttondelsfinaler</div>
           <div class="match" v-for="(match, i) in bracket.roundOf16" :key="'r16-' + i">
-            <div class="team blue-team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
-            <div class="team red-team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+            <div class="match-time" v-if="match.time">{{ match.time }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner === match.team1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner === match.team2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -43,8 +44,9 @@
         <div class="bracket-round quarter-finals">
           <div class="round-label">Kvartsfinaler</div>
           <div class="match" v-for="(match, i) in bracket.quarterFinals" :key="'qf-' + i">
-            <div class="team blue-team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
-            <div class="team red-team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+            <div class="match-time" v-if="match.time">{{ match.time }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner === match.team1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner === match.team2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -52,8 +54,9 @@
         <div class="bracket-round semi-finals">
           <div class="round-label">Semifinaler</div>
           <div class="match" v-for="(match, i) in bracket.semiFinals" :key="'sf-' + i">
-            <div class="team blue-team" :class="{ winner: match.winner === 1 }">{{ match.team1 }}</div>
-            <div class="team red-team" :class="{ winner: match.winner === 2 }">{{ match.team2 }}</div>
+            <div class="match-time" v-if="match.time">{{ match.time }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner === match.team1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner === match.team2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -61,8 +64,9 @@
         <div class="bracket-round final">
           <div class="round-label">Final (BO3)</div>
           <div class="match final-match">
-            <div class="team blue-team" :class="{ winner: bracket.final.winner === 1 }">{{ bracket.final.team1 }}</div>
-            <div class="team red-team" :class="{ winner: bracket.final.winner === 2 }">{{ bracket.final.team2 }}</div>
+            <div class="match-time" v-if="bracket.final.time">{{ bracket.final.time }}</div>
+            <div class="team blue-team" :class="{ winner: bracket.final.winner === bracket.final.team1 }">{{ bracket.final.team1 }}</div>
+            <div class="team red-team" :class="{ winner: bracket.final.winner === bracket.final.team2 }">{{ bracket.final.team2 }}</div>
           </div>
         </div>
 
@@ -87,29 +91,29 @@ export default {
       bracket: {
         // Round of 16 (8 matches)
         roundOf16: [
-          { team1: 'TeamKadeem', team2: 'FF15', winner: null },
-          { team1: 'Jontes Änglar', team2: 'Baron breewster', winner: null },
-          { team1: 'INTedgers', team2: 'Grit Gaming', winner: null },
-          { team1: 'SVP Jihad', team2: 'Oskars gossar', winner: null },
-          { team1: 'Data Party (Freakoff)', team2: 'svep67', winner: null },
-          { team1: 'The Wizards of Cz', team2: 'Larkers Segjärn', winner: null },
-          { team1: 'Poppyprovider', team2: 'airfryerGroup', winner: null },
-          { team1: 'Pappas lena händer', team2: 'SkibidiHuzzlers', winner: null }
+          { team1: 'TeamKadeem', team2: 'The Wizards of Cz', winner: 'The Wizards of Cz', time: '16:00 3/12' },
+          { team1: 'Jontes Änglar', team2: 'Baron breewster', winner: 'Baron breewster', time: '16:45 3/12' },
+          { team1: 'INTedgers', team2: 'Grit Gaming', winner: 'Grit Gaming', time: '17:30 3/12' },
+          { team1: 'airfryerGroup', team2: 'Oskars gossar', winner: 'airfryerGroup', time: '18:15 3/12' },
+          { team1: 'Data Party (Freakoff)', team2: 'svep67', winner: 'svep67', time: '19:00 3/12' },
+          { team1: 'FF15', team2: 'Larkers Segjärn', winner: 'Larkers Segjärn', time: '19:45 3/12' },
+          { team1: 'Poppyprovider', team2: 'SVP Jihad', winner: 'Poppyprovider', time: '20:30 3/12' },
+          { team1: 'Pappas lena händer', team2: 'SkibidiHuzzlers', winner: 'Pappas lena händer', time: '21:15 3/12' }
         ],
         // Quarter Finals (4 matches)
         quarterFinals: [
-          { team1: 'TBD', team2: 'TBD', winner: null },
-          { team1: 'TBD', team2: 'TBD', winner: null },
-          { team1: 'TBD', team2: 'TBD', winner: null },
-          { team1: 'TBD', team2: 'TBD', winner: null }
+          { team1: 'The Wizards of Cz', team2: 'Baron breewster', winner: 'Baron breewster', time: '17:00 4/12' },
+          { team1: 'Grit Gaming', team2: 'airfryerGroup', winner: 'airfryerGroup', time: '17:45 4/12' },
+          { team1: 'svep67', team2: 'Larkers Segjärn', winner: 'svep67', time: '18:30 4/12' },
+          { team1: 'Poppyprovider', team2: 'Pappas lena händer', winner: 'Pappas lena händer', time: '19:15 4/12' }
         ],
         // Semi Finals (2 matches)
         semiFinals: [
-          { team1: 'TBD', team2: 'TBD', winner: null },
-          { team1: 'TBD', team2: 'TBD', winner: null }
+          { team1: 'Baron Brewster', team2: 'airfryerGroup', winner: 'airfryerGroup', time: '20:00 4/12' },
+          { team1: 'svep67', team2: 'Pappas lena händer', winner: 'svep67', time: '20:45 4/12' }
         ],
         // Final (1 match - BO3)
-        final: { team1: 'TBD', team2: 'TBD', winner: null },
+        final: { team1: 'airfryerGroup', team2: 'svep67', winner: null, time: '18:30 5/12' },
         // Champion
         champion: 'TBD'
       },
@@ -118,10 +122,11 @@ export default {
           title: 'Tid och plats',
           content: `
             <p>Alla matcher spelas hemma</p>
+            <p>OBS: tiderna är ungefärliga, ha koll på streamen och discord</p>
             <h3>Onsdag 3/12</h3>
-            <p>16:00 - 23:00<br>Max 1 match per lag</p>
+            <p>16:00 - 22:00<br>Max 1 match per lag</p>
             <h3>Torsdag 4/12</h3>
-            <p>16:00 - 23:00<br>1 - 2 matcher per lag som kvarstår</p>
+            <p>17:00 - 21:30<br>1 - 2 matcher per lag som kvarstår</p>
             <h3>Fredag 5/12</h3>
             <p>18:00 - 22:00</p>
           `
@@ -442,6 +447,17 @@ h1 {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.match-time {
+  font-family: 'IM Fell English SC', serif;
+  font-size: 2rem;
+  color: #ffd700;
+  text-align: center;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid #444;
+  font-weight: bold;
+}
+
 .match:hover {
   transform: scale(1.02);
   box-shadow: 0 4px 16px #a8180c44;
@@ -475,17 +491,26 @@ h1 {
 
 .team.winner {
   font-weight: bold;
-  color: #fff;
+  color: #ffd700;
+  text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffb700;
+  animation: winner-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes winner-glow {
+  from {
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffb700;
+  }
+  to {
+    text-shadow: 0 0 15px #ffd700, 0 0 30px #ffd700, 0 0 45px #ffb700;
+  }
 }
 
 .team.blue-team.winner {
-  background: linear-gradient(90deg, #1e90ff 0%, #4169e1 100%);
-  border-left-color: #4169e1;
+  border-left-color: #1e90ff;
 }
 
 .team.red-team.winner {
-  background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
-  border-left-color: #c82333;
+  border-left-color: #dc3545;
 }
 
 /* Round of 16 spacing */
