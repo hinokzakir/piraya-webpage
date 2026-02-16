@@ -94,7 +94,10 @@ export default {
   methods: {
     async login() {
       try {
-        const res = await fetch('http://localhost:3000/api/admin/login', {
+        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
+        const baseUrl = `http://${ip}`;
+
+        const res = await fetch(`${baseUrl}/api/admin/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: this.username, password: this.password })
@@ -115,14 +118,22 @@ export default {
       await this.refreshStatus();
     },
     async refreshStatus() {
+        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
+        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
+        const baseUrl = `http://${ip}:${port}`;
+        
         // Just calling status endpoint
-        const res = await fetch('http://localhost:3000/api/status');
+        const res = await fetch(`${baseUrl}/api/status`);
         const data = await res.json();
         this.isOpen = data.isOpen;
         this.teams = data.teams || [];
     },
     async toggleStatus() {
-      const res = await fetch('http://localhost:3000/api/admin/toggle', { method: 'POST' });
+      const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
+      const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
+      const baseUrl = `http://${ip}:${port}`;
+
+      const res = await fetch(`${baseUrl}/api/admin/toggle`, { method: 'POST' });
       const data = await res.json();
       this.isOpen = data.isOpen;
       // If we just opened, fetch teams
@@ -130,7 +141,11 @@ export default {
     },
     deleteTeam(id) {
         if(!confirm('Är du säker?')) return;
-        fetch(`http://localhost:3000/api/admin/teams/${id}`, { method: 'DELETE' })
+        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
+        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
+        const baseUrl = `http://${ip}:${port}`;
+
+        fetch(`${baseUrl}/api/admin/teams/${id}`, { method: 'DELETE' })
             .then(() => this.refreshStatus());
     },
     startEdit(team) {
@@ -142,7 +157,11 @@ export default {
         this.editForm = {};
     },
     saveEdit(id) {
-        fetch(`http://localhost:3000/api/admin/teams/${id}`, { 
+        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
+        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
+        const baseUrl = `http://${ip}:${port}`;
+
+        fetch(`${baseUrl}/api/admin/teams/${id}`, { 
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(this.editForm)

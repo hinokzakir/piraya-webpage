@@ -34,7 +34,7 @@ h1 {
   font-size: clamp(2.2rem, 6vw, 4.5rem);
   text-align: center;
   text-shadow: 0 2px 16px #a8180c, 0 1px 0 #000;
-  margin-top: 0;
+  margin-top: 100px;
   margin-bottom: 32px;
   letter-spacing: 0.04em;
 }

@@ -3,43 +3,75 @@
     <div class="content-container">
       <h1>Otympliga Spelen</h1>
 
+      <div v-if="isOpen" class="status-bar">
+        <div v-if="isFull" class="status-full">
+            🔴 EVENTET ÄR FULLBOKAT
+        </div>
+        <div v-else class="status-open">
+            🟢 Lag Platser kvar: <strong>{{ spotsLeft }}</strong>
+            <span v-if="gasqueLeft !== undefined" style="margin-left: 15px;">
+                (Gasque: <strong>{{ gasqueLeft }}</strong> kvar)
+            </span>
+        </div>
+      </div>
+
       <div v-if="!isOpen" class="locked-message">
         <h2>När öppnar anmälan?</h2>
         <p class="deadline-text">17/2 (1337+666+420+67) / (69-67)</p>
       </div>
 
       <div v-else class="open-content">
-        <!-- Team List -->
-         <div class="teams-list-section">
+        
+        <div class="teams-list-section">
             <h2>Anmälda Lag</h2>
             <div v-if="teams.length === 0" class="no-teams">Inga lag anmälda än. Bli först!</div>
             <div class="teams-grid">
-                <div v-for="team in teams" :key="team.id" class="team-card" @click="toggleTeamDetails(team.id)">
-                    <h3>{{ team.name }}</h3>
-                    <p>{{ team.members.length }} Medlemmar</p>
+                <div 
+                    v-for="team in teams" 
+                    :key="team.id" 
+                    class="team-card" 
+                    :class="{ 'late-entry': team.isLate }"
+                    @click="toggleTeamDetails(team.id)"
+                >
+                    <div class="team-header">
+                        <h3>{{ team.name }}</h3>
+                        <span v-if="team.isLate" class="late-badge">⚠️ RESERVPLATS</span>
+                    </div>
+                    <p>{{ team.members.length }} Medlemmar <span v-if="team.registeredAt" style="font-size:0.8em; opacity:0.7">({{ formatTime(team.registeredAt) }})</span></p>
                     
                     <div v-if="expandedTeamId === team.id" class="team-details">
-                        <div v-for="member in team.members" :key="member.personnumber" class="member-detail">
-                            <strong>{{ member.nickname }}</strong> ({{ member.role }})<br>
-                            Drink: {{ member.drink }}
+                        <div v-for="(member, mIndex) in team.members" :key="mIndex" class="member-detail">
+                            <span class="member-role">{{ member.nickname }}</span> ({{ member.role }})
+                            <span v-if="member.isLate" class="member-late-mark" title="Sen anmälan">*</span>
+                            <br>
+                            <span class="drink-info">🍺 {{ member.drink }}</span>
+                            <span class="gasque-info" v-if="member.gasque">🍽️ Gasque</span>
                         </div>
                     </div>
                 </div>
             </div>
          </div>
 
-        <!-- Signup Form -->
-        <button v-if="!showForm" class="submit-btn" @click="showForm = true" style="margin-top: 0;">
-            Anmäl ett lag
-        </button>
+        <div v-if="!isFull">
+            <button v-if="!showForm" class="submit-btn" @click="showForm = true" style="margin-top: 0;">
+                Anmäl ett lag
+            </button>
+        </div>
+        <div v-else class="full-message">
+            <p>Anmälan är stängd då maxgränsen är nådd.</p>
+        </div>
 
-        <div v-if="showForm" class="signup-form">
+        <div v-if="showForm && !isFull" class="signup-form">
           <h2>Anmälan</h2>
+          <p v-if="spotsLeft < 6" class="warning-text">
+            OBS: Det är få platser kvar! Om ditt lag gör att gränsen passeras kommer ni hamna på reservlista.
+          </p>
           <form @submit.prevent="submitTeam">
             <div class="form-group">
               <label for="teamName">Lagnamn:</label>
               <input type="text" id="teamName" v-model="formRef.name" required placeholder="ta nåt nice" />
             </div>
+            
             <div class="form-group">
               <label for="teamDescription">Lagbeskrivning:</label>
               <input type="text" id="teamDescription" v-model="formRef.description" required placeholder="skriv nåt bra info om laget" />
@@ -74,6 +106,7 @@
                   <label>Funktion i laget:</label>
                   <input type="text" v-model="member.role" required placeholder="tänk inte så länge på de" />
                 </div>
+                
                 <div class="form-group">
                   <label>Allergier:</label>
                   <input type="text" v-model="member.allergies" placeholder="lämna tomt om inga" />
@@ -87,6 +120,13 @@
                     <option value="cider">Cider</option>
                     <option value="soda">Läsk</option>
                   </select>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" v-model="member.gasque">
+                        Vill gå på Gasque?
+                    </label>
                 </div>
               </div>
               
@@ -128,11 +168,14 @@ export default {
   data() {
     return {
       isOpen: false,
+      isFull: false,      // NY: Kollar om det är fullt
+      spotsLeft: 0,       // NY: Antal platser kvar
+      gasqueLeft: undefined, // NY: Antal gasque-biljetter kvar
       showForm: false,
       teams: [],
       expandedTeamId: null,
       submitting: false,
-      formRef: { // Renamed from 'team' to avoid confusion with teams list
+      formRef: {
         name: '',
         description: '',
         members: []
@@ -169,10 +212,20 @@ export default {
   methods: {
     async fetchStatus() {
       try {
-        const res = await fetch('http://localhost:3000/api/status');
+        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
+        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
+        const baseUrl = `http://${ip}:${port}`;
+        
+        const res = await fetch(`${baseUrl}/api/status`);
         const data = await res.json();
+        
         this.isOpen = data.isOpen;
         this.teams = data.teams || [];
+        // Uppdatera status för platser
+        this.spotsLeft = data.spotsLeft;
+        this.isFull = data.isFull;
+        this.gasqueLeft = data.gasqueLeft; // Kan vara undefined om servern inte stödjer det än
+
       } catch (err) {
         console.error('Failed to fetch status:', err);
       }
@@ -184,6 +237,11 @@ export default {
             this.expandedTeamId = id;
         }
     },
+    formatTime(isoString) {
+        if(!isoString) return '';
+        const d = new Date(isoString);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    },
     addMember() {
       this.formRef.members.push({
         name: '',
@@ -191,7 +249,8 @@ export default {
         nickname: '',
         role: '',
         allergies: '',
-        drink: ''
+        drink: '',
+        gasque: false
       });
     },
     removeMember(index) {
@@ -200,21 +259,46 @@ export default {
     async submitTeam() {
       this.submitting = true;
       try {
-          const res = await fetch('http://localhost:3000/api/register', {
+          // Förbered datan enligt serverns nya struktur
+          // (Servern vill ha 'members' som en array av objekt)
+          const payload = {
+              name: this.formRef.name,
+              // Vi skickar description även om servern kanske inte sparar den i nuvarande DB-schema
+              description: this.formRef.description, 
+              members: this.formRef.members
+          };
+
+          const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
+          const baseUrl = `http://${ip}`;
+
+          const res = await fetch(`${baseUrl}/api/register`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(this.formRef)
+              body: JSON.stringify(payload)
           });
           
+          const result = await res.json();
+
           if (res.ok) {
-              alert(`Anmälan mottagen för laget: ${this.formRef.name}!`);
-              this.formRef = { name: '', members: [] }; // Reset form
-              this.addMember(); // Add first blank member
-              this.fetchStatus(); // Refresh list
+              let msg = `Anmälan mottagen för laget: ${this.formRef.name}!`;
+              // Om servern säger att laget blev flaggat som sent
+              if (result.message && result.message.includes('Late')) {
+                  msg += '\n\nOBS: Ni hamnade på reservlista/sen anmälan då platserna tog slut.';
+              }
+              alert(msg);
+              
+              this.formRef = { name: '', description: '', members: [] }; // Reset
+              this.addMember(); 
+              this.fetchStatus(); 
               this.showForm = false;
           } else {
-              const err = await res.json();
-              alert('Fel vid anmälan: ' + (err.error || 'Okänt fel'));
+              if (result.error === 'No gasque tickets left') {
+                  alert('Tyvärr, gasque-biljetterna är slut för en eller flera medlemmar som valt det.');
+              } else if (result.error === 'No team slots left') {
+                  alert('Tyvärr, det finns inga lagplatser kvar.');
+              } else {
+                  alert('Fel vid anmälan: ' + (result.error || 'Okänt fel'));
+              }
           }
       } catch (e) {
           console.error(e);
@@ -225,9 +309,9 @@ export default {
     }
   },
   mounted() {
-    this.addMember(); // Init form
+    this.addMember(); // Init form with 1 member
     this.fetchStatus();
-    this.pollingInterval = setInterval(this.fetchStatus, 5000); // Poll every 5s
+    this.pollingInterval = setInterval(this.fetchStatus, 5000); // Polling oftare (5 sek) vid släpp!
   },
   beforeUnmount() {
     clearInterval(this.pollingInterval);
@@ -241,7 +325,7 @@ export default {
 .os-page {
   min-height: 100vh;
   background: rgba(0, 0, 0, 0); 
-  padding-top: 100px;
+  padding-top: 50px;
   color: #fff;
   font-family: 'IM Fell English SC', serif;
 }
@@ -256,9 +340,28 @@ export default {
 
 h1 {
   font-size: clamp(2.5rem, 5vw, 4rem);
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   text-shadow: 0 2px 10px #a8180c;
   color: #fff;
+}
+
+/* Status Bar */
+.status-bar {
+    margin-bottom: 40px;
+    font-size: 1.5rem;
+    padding: 10px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 8px;
+    display: inline-block;
+}
+.status-open { color: #4caf50; }
+.status-full { color: #ff4444; font-weight: bold; animation: pulse 2s infinite;}
+.warning-text { color: #ff9800; font-weight: bold; margin-bottom: 20px;}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
 }
 
 h2 {
@@ -267,7 +370,85 @@ h2 {
   color: #a8180c;
 }
 
-/* FAQ Section */
+/* Teams List */
+.teams-list-section {
+    margin-bottom: 50px;
+}
+
+.teams-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.team-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #4caf50; /* Grön som default */
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: left;
+}
+
+/* Stil för sena lag */
+.team-card.late-entry {
+    border-left-color: #ff4444;
+    background: rgba(255, 68, 68, 0.05);
+}
+
+.team-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.late-badge {
+    background: #ff4444;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+.team-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #444;
+}
+
+.member-detail {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    color: #ccc;
+    line-height: 1.4;
+}
+
+.member-role {
+    color: #fff;
+    font-weight: bold;
+}
+
+.drink-info {
+    font-size: 0.85rem;
+    color: #888;
+    margin-left: 5px;
+}
+
+.gasque-info {
+    font-size: 0.85rem;
+    color: #ffd700;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+/* FAQ, Form, etc (Mostly unchanged styles below) */
 .faq-section {
     margin-top: 80px;
     margin-bottom: 50px;
@@ -303,8 +484,7 @@ h2 {
     line-height: 1.5;
 }
 
-/* Locked State */
-.locked-message {
+.locked-message, .full-message {
   background: rgba(20, 20, 20, 0.9);
   padding: 60px;
   border-radius: 15px;
@@ -317,50 +497,13 @@ h2 {
   color: #ddd;
 }
 
-/* Teams List */
-.teams-list-section {
-    margin-bottom: 50px;
-}
-
-.teams-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.team-card {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #a8180c;
-    cursor: pointer;
-    transition: background 0.2s;
-    text-align: left;
-}
-
-.team-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.team-details {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #444;
-}
-
-.member-detail {
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-    color: #ccc;
-}
-
-/* Form Styles */
 .signup-form {
   background: rgba(20, 20, 20, 0.92);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
   text-align: left;
+  margin-top: 20px;
 }
 
 .signup-form h2 {
@@ -389,7 +532,7 @@ h2 {
   color: #fff;
   font-family: 'IM Fell English SC', serif;
   font-size: 1.1rem;
-  box-sizing: border-box; /* Important for padding */
+  box-sizing: border-box; 
 }
 
 .form-group input:focus,
@@ -399,18 +542,32 @@ h2 {
   box-shadow: 0 0 8px rgba(168, 24, 12, 0.5);
 }
 
+.checkbox-group {
+    margin-top: 15px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin: 0;
+}
+
 .member-card {
   background: rgba(255, 255, 255, 0.05);
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 25px;
   border-left: 4px solid #a8180c;
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .member-header {
@@ -522,7 +679,6 @@ h2 {
   transform: translateY(1px);
 }
 
-/* Mobile Responsiveness */
 @media (max-width: 600px) {
   .signup-form {
     padding: 20px;
