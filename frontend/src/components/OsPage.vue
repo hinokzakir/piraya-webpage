@@ -214,7 +214,7 @@ export default {
       try {
         const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
         const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
-        const baseUrl = `http://${ip}:${port}`;
+        const baseUrl = `https://${ip}:${port}`;
         
         const res = await fetch(`${baseUrl}/api/status`);
         const data = await res.json();

@@ -95,7 +95,7 @@ export default {
     async login() {
       try {
         const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-        const baseUrl = `http://${ip}`;
+        const baseUrl = `https://${ip}`;
 
         const res = await fetch(`${baseUrl}/api/admin/login`, {
           method: 'POST',
