@@ -49,6 +49,7 @@ type TournamentTeam struct {
 	ID        int64    `json:"id"`
 	Game      string   `json:"game"`
 	Name      string   `json:"name"`
+	GroupName string   `json:"groupName"`
 	Players   []string `json:"players"`
 	CreatedAt string   `json:"createdAt"`
 }
@@ -90,7 +91,41 @@ func b2i(b bool) int {
 	return 0
 }
 
-// --- Health & Admin Login ---
+// --- Health, Pages & Admin Login ---
+
+func (s *Server) getPages(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.db.Query(`SELECT page, visible FROM page_settings`)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	pages := map[string]bool{"os": false, "lol": false, "cs": false}
+	for rows.Next() {
+		var page string
+		var vis int
+		if err := rows.Scan(&page, &vis); err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		pages[page] = vis != 0
+	}
+	writeJSON(w, http.StatusOK, pages)
+}
+
+func (s *Server) togglePage(w http.ResponseWriter, r *http.Request) {
+	page := r.PathValue("page")
+	if page != "os" && page != "lol" && page != "cs" {
+		writeErr(w, http.StatusBadRequest, "invalid page")
+		return
+	}
+	if _, err := s.db.Exec(`UPDATE page_settings SET visible = 1 - visible WHERE page=?`, page); err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	s.getPages(w, r)
+}
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	if err := s.db.Ping(); err != nil {
@@ -432,7 +467,7 @@ func (s *Server) osDeleteTeam(w http.ResponseWriter, r *http.Request) {
 func (s *Server) listTournamentTeams(game string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rows, err := s.db.Query(
-			`SELECT id, game, name, players_json, created_at FROM tournament_teams WHERE game=? ORDER BY id ASC`,
+			`SELECT id, game, name, group_name, players_json, created_at FROM tournament_teams WHERE game=? ORDER BY id ASC`,
 			game,
 		)
 		if err != nil {
@@ -445,7 +480,7 @@ func (s *Server) listTournamentTeams(game string) http.HandlerFunc {
 		for rows.Next() {
 			var t TournamentTeam
 			var pj string
-			if err := rows.Scan(&t.ID, &t.Game, &t.Name, &pj, &t.CreatedAt); err != nil {
+			if err := rows.Scan(&t.ID, &t.Game, &t.Name, &t.GroupName, &pj, &t.CreatedAt); err != nil {
 				writeErr(w, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -472,8 +507,8 @@ func (s *Server) createTournamentTeam(game string) http.HandlerFunc {
 		pj, _ := json.Marshal(t.Players)
 		now := time.Now().UTC().Format(time.RFC3339)
 		res, err := s.db.Exec(
-			`INSERT INTO tournament_teams (game, name, players_json, created_at) VALUES (?, ?, ?, ?)`,
-			game, t.Name, string(pj), now,
+			`INSERT INTO tournament_teams (game, name, group_name, players_json, created_at) VALUES (?, ?, ?, ?, ?)`,
+			game, t.Name, t.GroupName, string(pj), now,
 		)
 		if err != nil {
 			writeErr(w, http.StatusInternalServerError, err.Error())
@@ -503,8 +538,8 @@ func (s *Server) updateTournamentTeam(game string) http.HandlerFunc {
 		}
 		pj, _ := json.Marshal(t.Players)
 		res, err := s.db.Exec(
-			`UPDATE tournament_teams SET name=?, players_json=? WHERE id=? AND game=?`,
-			t.Name, string(pj), id, game,
+			`UPDATE tournament_teams SET name=?, group_name=?, players_json=? WHERE id=? AND game=?`,
+			t.Name, t.GroupName, string(pj), id, game,
 		)
 		if err != nil {
 			writeErr(w, http.StatusInternalServerError, err.Error())

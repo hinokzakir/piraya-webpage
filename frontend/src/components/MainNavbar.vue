@@ -9,7 +9,7 @@
 			</div>
 			<transition name="menu-slide">
 				<div class="links" :class="{ 'mobile-active': menuOpen }">
-					<li v-for="(item, idx) in navItems" :key="idx">
+					<li v-for="item in visibleNavItems" :key="item.to">
 						<router-link :to="item.to" @click="closeMenu">{{ item.label }}</router-link>
 					</li>
 				</div>
@@ -23,6 +23,7 @@ export default {
 	data() {
 		return {
 			menuOpen: false,
+			pages: { os: false, lol: false, cs: false },
 			navItems: [
 				{ to: '/', label: 'Hem' },
 				{ to: '/members', label: 'Medlemmar' },
@@ -30,7 +31,31 @@ export default {
 			]
 		}
 	},
+	computed: {
+		visibleNavItems() {
+			const items = [...this.navItems];
+			if (this.pages.os) items.push({ to: '/os', label: 'OS' });
+			if (this.pages.lol) items.push({ to: '/lol', label: 'LoL' });
+			if (this.pages.cs) items.push({ to: '/cs', label: 'CS' });
+			return items;
+		}
+	},
+	mounted() {
+		this.fetchPages();
+		window.addEventListener('pages-updated', this.fetchPages);
+	},
+	beforeUnmount() {
+		window.removeEventListener('pages-updated', this.fetchPages);
+	},
 	methods: {
+		async fetchPages() {
+			try {
+				const res = await fetch('/api/pages');
+				if (res.ok) this.pages = await res.json();
+			} catch (e) {
+				console.error('Kunde inte hämta sidinställningar:', e);
+			}
+		},
 		toggleMenu() {
 			this.menuOpen = !this.menuOpen
 		},

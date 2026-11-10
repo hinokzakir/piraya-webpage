@@ -28,6 +28,10 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	// Page visibility
+	mux.HandleFunc("GET /api/pages", s.getPages)
+	mux.HandleFunc("POST /api/admin/pages/{page}/toggle", s.togglePage)
+
 	// Health
 	mux.HandleFunc("GET /api/health", s.health)
 
@@ -116,9 +120,16 @@ func initDB(dbPath string) (*sql.DB, error) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		game TEXT NOT NULL,
 		name TEXT NOT NULL,
+		group_name TEXT NOT NULL DEFAULT '',
 		players_json TEXT NOT NULL DEFAULT '[]',
 		created_at TEXT NOT NULL
 	);
+
+	CREATE TABLE IF NOT EXISTS page_settings (
+		page TEXT PRIMARY KEY,
+		visible INTEGER NOT NULL DEFAULT 0
+	);
+	INSERT OR IGNORE INTO page_settings (page, visible) VALUES ('os', 0), ('lol', 0), ('cs', 0);
 
 	CREATE TABLE IF NOT EXISTS tournament_matches (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,6 +145,7 @@ func initDB(dbPath string) (*sql.DB, error) {
 		_ = db.Close()
 		return nil, err
 	}
+	_, _ = db.Exec(`ALTER TABLE tournament_teams ADD COLUMN group_name TEXT NOT NULL DEFAULT ''`)
 	return db, nil
 }
 

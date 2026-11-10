@@ -26,27 +26,75 @@
       </div>
     </div>
 
-    <!-- Tournament Bracket -->
+    <!-- Group Stage -->
     <div class="bracket-section">
-      <h2 class="bracket-title">Turnerings Bracket</h2>
-      <div class="bracket-container">
-        <!-- Round of 16 -->
-        <div class="bracket-round round-of-16">
-          <div class="round-label">Åttondelsfinaler</div>
-          <div class="match" v-for="(match, i) in bracket.roundOf16" :key="'r16-' + i">
-            <div class="match-time" v-if="match.time">{{ match.time }}</div>
-            <div class="team blue-team" :class="{ winner: match.winner === match.team1 }">{{ match.team1 }}</div>
-            <div class="team red-team" :class="{ winner: match.winner === match.team2 }">{{ match.team2 }}</div>
+      <h2 class="bracket-title">Gruppspel</h2>
+      <p class="group-hint">Klicka på en grupp för att se matcher</p>
+      <div class="groups-grid">
+        <div
+          v-for="g in ['A', 'B', 'C', 'D']"
+          :key="g"
+          class="group-card"
+          :class="{ active: selectedGroup === g }"
+          @click="selectedGroup = selectedGroup === g ? null : g"
+        >
+          <h3>Grupp {{ g }}</h3>
+          <table class="group-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Lag</th>
+                <th>S</th>
+                <th>V</th>
+                <th>F</th>
+                <th>P</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(row, idx) in groupStandings[g]"
+                :key="row.name"
+                :class="{ advancing: idx < 2 }"
+              >
+                <td>{{ idx + 1 }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.played }}</td>
+                <td>{{ row.wins }}</td>
+                <td>{{ row.losses }}</td>
+                <td>{{ row.points }}</td>
+              </tr>
+              <tr v-if="groupStandings[g].length === 0">
+                <td colspan="6" class="empty-cell">Inga lag i gruppen ännu</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div v-if="selectedGroup" class="group-matches">
+        <h3>Matcher – Grupp {{ selectedGroup }}</h3>
+        <p v-if="selectedGroupMatches.length === 0" class="group-hint">Inga matcher inlagda i Grupp {{ selectedGroup }} ännu.</p>
+        <div class="group-matches-grid">
+          <div v-for="match in selectedGroupMatches" :key="match.id" class="match">
+            <div class="match-time" v-if="match.matchTime">{{ match.matchTime }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner && match.winner === match.team1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner && match.winner === match.team2 }">{{ match.team2 }}</div>
           </div>
         </div>
+      </div>
+    </div>
 
+    <!-- Tournament Bracket (Quarter Finals onwards) -->
+    <div class="bracket-section">
+      <h2 class="bracket-title">Slutspel Bracket</h2>
+      <div class="bracket-container">
         <!-- Quarter Finals -->
         <div class="bracket-round quarter-finals">
           <div class="round-label">Kvartsfinaler</div>
           <div class="match" v-for="(match, i) in bracket.quarterFinals" :key="'qf-' + i">
-            <div class="match-time" v-if="match.time">{{ match.time }}</div>
-            <div class="team blue-team" :class="{ winner: match.winner === match.team1 }">{{ match.team1 }}</div>
-            <div class="team red-team" :class="{ winner: match.winner === match.team2 }">{{ match.team2 }}</div>
+            <div class="match-time" v-if="match.matchTime">{{ match.matchTime }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner && match.winner === match.team1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner && match.winner === match.team2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -54,9 +102,9 @@
         <div class="bracket-round semi-finals">
           <div class="round-label">Semifinaler</div>
           <div class="match" v-for="(match, i) in bracket.semiFinals" :key="'sf-' + i">
-            <div class="match-time" v-if="match.time">{{ match.time }}</div>
-            <div class="team blue-team" :class="{ winner: match.winner === match.team1 }">{{ match.team1 }}</div>
-            <div class="team red-team" :class="{ winner: match.winner === match.team2 }">{{ match.team2 }}</div>
+            <div class="match-time" v-if="match.matchTime">{{ match.matchTime }}</div>
+            <div class="team blue-team" :class="{ winner: match.winner && match.winner === match.team1 }">{{ match.team1 }}</div>
+            <div class="team red-team" :class="{ winner: match.winner && match.winner === match.team2 }">{{ match.team2 }}</div>
           </div>
         </div>
 
@@ -64,9 +112,9 @@
         <div class="bracket-round final">
           <div class="round-label">Final (BO3)</div>
           <div class="match final-match">
-            <div class="match-time" v-if="bracket.final.time">{{ bracket.final.time }}</div>
-            <div class="team blue-team" :class="{ winner: bracket.final.winner === bracket.final.team1 }">{{ bracket.final.team1 }}</div>
-            <div class="team red-team" :class="{ winner: bracket.final.winner === bracket.final.team2 }">{{ bracket.final.team2 }}</div>
+            <div class="match-time" v-if="bracket.final.matchTime">{{ bracket.final.matchTime }}</div>
+            <div class="team blue-team" :class="{ winner: bracket.final.winner && bracket.final.winner === bracket.final.team1 }">{{ bracket.final.team1 }}</div>
+            <div class="team red-team" :class="{ winner: bracket.final.winner && bracket.final.winner === bracket.final.team2 }">{{ bracket.final.team2 }}</div>
           </div>
         </div>
 
@@ -87,36 +135,9 @@ export default {
   name: 'LolPage',
   data() {
     return {
-      // Tournament bracket data - easy to update with team names
-      bracket: {
-        // Round of 16 (8 matches)
-        roundOf16: [
-          { team1: 'TeamKadeem', team2: 'The Wizards of Cz', winner: 'The Wizards of Cz', time: '16:00 3/12' },
-          { team1: 'Jontes Änglar', team2: 'Baron breewster', winner: 'Baron breewster', time: '16:45 3/12' },
-          { team1: 'INTedgers', team2: 'Grit Gaming', winner: 'Grit Gaming', time: '17:30 3/12' },
-          { team1: 'airfryerGroup', team2: 'Oskars gossar', winner: 'airfryerGroup', time: '18:15 3/12' },
-          { team1: 'Data Party (Freakoff)', team2: 'svep67', winner: 'svep67', time: '19:00 3/12' },
-          { team1: 'FF15', team2: 'Larkers Segjärn', winner: 'Larkers Segjärn', time: '19:45 3/12' },
-          { team1: 'Poppyprovider', team2: 'SVP Jihad', winner: 'Poppyprovider', time: '20:30 3/12' },
-          { team1: 'Pappas lena händer', team2: 'SkibidiHuzzlers', winner: 'Pappas lena händer', time: '21:15 3/12' }
-        ],
-        // Quarter Finals (4 matches)
-        quarterFinals: [
-          { team1: 'The Wizards of Cz', team2: 'Baron breewster', winner: 'Baron breewster', time: '17:00 4/12' },
-          { team1: 'Grit Gaming', team2: 'airfryerGroup', winner: 'airfryerGroup', time: '17:45 4/12' },
-          { team1: 'svep67', team2: 'Larkers Segjärn', winner: 'svep67', time: '18:30 4/12' },
-          { team1: 'Poppyprovider', team2: 'Pappas lena händer', winner: 'Pappas lena händer', time: '19:15 4/12' }
-        ],
-        // Semi Finals (2 matches)
-        semiFinals: [
-          { team1: 'Baron Brewster', team2: 'airfryerGroup', winner: 'airfryerGroup', time: '20:00 4/12' },
-          { team1: 'svep67', team2: 'Pappas lena händer', winner: 'svep67', time: '20:45 4/12' }
-        ],
-        // Final (1 match - BO3)
-        final: { team1: 'airfryerGroup', team2: 'svep67', winner: null, time: '18:30 5/12' },
-        // Champion
-        champion: 'TBD'
-      },
+      teams: [],
+      matches: [],
+      selectedGroup: null,
       sections: [
         {
           title: 'Tid och plats',
@@ -184,6 +205,76 @@ export default {
         }
       ]
     };
+  },
+  async mounted() {
+    try {
+      const [teamsRes, matchesRes] = await Promise.all([
+        fetch('/api/lol/teams'),
+        fetch('/api/lol/matches')
+      ]);
+      if (teamsRes.ok) this.teams = await teamsRes.json();
+      if (matchesRes.ok) this.matches = await matchesRes.json();
+    } catch (e) {
+      console.error('Kunde inte hämta LoL-turnering:', e);
+    }
+  },
+  computed: {
+    groupStandings() {
+      const result = { A: [], B: [], C: [], D: [] };
+      for (const g of ['A', 'B', 'C', 'D']) {
+        const stats = {};
+        const addTeam = (name) => {
+          if (name && !stats[name]) stats[name] = { name, played: 0, wins: 0, losses: 0, points: 0 };
+        };
+        this.teams
+          .filter(t => (t.groupName || '').toUpperCase() === g)
+          .forEach(t => addTeam(t.name));
+
+        this.matches
+          .filter(m => m.round === `Grupp ${g}`)
+          .forEach(m => {
+            addTeam(m.team1);
+            addTeam(m.team2);
+            if (m.winner) {
+              if (stats[m.team1]) {
+                stats[m.team1].played++;
+                if (m.winner === m.team1) { stats[m.team1].wins++; stats[m.team1].points += 3; }
+                else stats[m.team1].losses++;
+              }
+              if (stats[m.team2]) {
+                stats[m.team2].played++;
+                if (m.winner === m.team2) { stats[m.team2].wins++; stats[m.team2].points += 3; }
+                else stats[m.team2].losses++;
+              }
+            }
+          });
+
+        result[g] = Object.values(stats).sort((a, b) =>
+          b.points - a.points || a.losses - b.losses || a.name.localeCompare(b.name)
+        );
+      }
+      return result;
+    },
+    selectedGroupMatches() {
+      if (!this.selectedGroup) return [];
+      return this.matches.filter(m => m.round === `Grupp ${this.selectedGroup}`);
+    },
+    bracket() {
+      const pad = (list, size) => {
+        const out = list.slice(0, size);
+        while (out.length < size) out.push({ team1: 'TBD', team2: 'TBD', winner: '', matchTime: '' });
+        return out;
+      };
+      const qf = pad(this.matches.filter(m => m.round === 'Kvartsfinal'), 4);
+      const sf = pad(this.matches.filter(m => m.round === 'Semifinal'), 2);
+      const finalMatch = this.matches.find(m => m.round === 'Final') || { team1: 'TBD', team2: 'TBD', winner: '', matchTime: '' };
+      return {
+        quarterFinals: qf,
+        semiFinals: sf,
+        final: finalMatch,
+        champion: finalMatch.winner || 'TBD'
+      };
+    }
   }
 };
 </script>
@@ -627,6 +718,101 @@ h1 {
   .quarter-finals .match,
   .semi-finals .match {
     margin-bottom: 8px;
+  }
+}
+
+/* Group Stage */
+.group-hint {
+  color: #aaa;
+  text-align: center;
+  margin-top: -16px;
+  margin-bottom: 24px;
+  font-family: 'IM Fell English SC', serif;
+}
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.group-card {
+  background: rgba(40, 40, 40, 0.9);
+  border-radius: 12px;
+  padding: 18px;
+  border: 2px solid #333;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.group-card:hover,
+.group-card.active {
+  border-color: #a8180c;
+  transform: translateY(-2px);
+}
+
+.group-card h3 {
+  font-family: 'IM Fell English SC', serif;
+  color: #fff;
+  margin: 0 0 12px;
+  text-align: center;
+  border-bottom: 2px solid #a8180c;
+  padding-bottom: 6px;
+}
+
+.group-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'IM Fell English SC', serif;
+  color: #e0e0e0;
+}
+
+.group-table th,
+.group-table td {
+  padding: 8px 6px;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.group-table th {
+  color: #a8180c;
+}
+
+.group-table tr.advancing {
+  border-left: 3px solid #4caf50;
+}
+
+.empty-cell {
+  text-align: center !important;
+  color: #888;
+}
+
+.group-matches {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+}
+
+.group-matches h3 {
+  font-family: 'IM Fell English SC', serif;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.group-matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.group-matches .match-time {
+  font-size: 1rem;
+}
+
+@media (max-width: 800px) {
+  .groups-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
