@@ -2,71 +2,86 @@
   <div class="admin-page">
     <h1>Piraya Admin</h1>
 
-    <!-- Login Form -->
-    <div v-if="!token" class="login-container">
+    <div v-if="!token" class="box login-box">
       <form @submit.prevent="login">
-        <div class="form-group">
-          <label>Användarnamn</label>
-          <input v-model="username" type="text" required />
-        </div>
-        <div class="form-group">
-          <label>Lösenord</label>
-          <input v-model="password" type="password" required />
-        </div>
+        <div class="form-group"><label>Användarnamn</label><input v-model="username" required /></div>
+        <div class="form-group"><label>Lösenord</label><input v-model="password" type="password" required /></div>
         <button type="submit">Logga in</button>
       </form>
     </div>
 
-    <!-- Dashboard -->
     <div v-else class="dashboard">
-      <div class="controls">
-        <h2>Status: <span :class="{'open': isOpen, 'closed': !isOpen}">{{ isOpen ? 'ÖPPEN' : 'STÄNGD' }}</span></h2>
-        <button @click="toggleStatus" class="toggle-btn">
-          {{ isOpen ? 'Stäng Anmälan' : 'Öppna Anmälan' }}
-        </button>
+      <div class="tabs">
+        <button v-for="(label, key) in tabs" :key="key" :class="{ active: tab === key }" @click="setTab(key)">{{ label }}</button>
+        <button class="logout-btn" @click="logout">Logga ut</button>
       </div>
 
-      <div class="teams-list">
-        <h2>Anmälda Lag ({{ teams.length }})</h2>
+      <p v-if="errorMsg" class="error-banner">{{ errorMsg }}</p>
+
+      <div v-if="tab === 'os'">
+        <div class="box controls">
+          <h2>Status: <span :class="isOpen ? 'open' : 'closed'">{{ isOpen ? 'ÖPPEN' : 'STÄNGD' }}</span></h2>
+          <button @click="toggleStatus" class="toggle-btn">{{ isOpen ? 'Stäng Anmälan' : 'Öppna Anmälan' }}</button>
+        </div>
+        <form class="box inline-form" @submit.prevent="saveSettings">
+          <label>Max lag: <input v-model.number="settings.maxTeams" type="number" min="0" required /></label>
+          <label>Max gasque: <input v-model.number="settings.maxGasque" type="number" min="0" required /></label>
+          <button type="submit" class="btn save">Spara inställningar</button>
+        </form>
+      </div>
+
+      <div v-for="sec in sections" :key="sec.id" class="section">
+        <h2>{{ sec.title }} ({{ sec.items.length }})</h2>
+
+        <form v-if="sec.create" class="box inline-form" @submit.prevent="createItem(sec)">
+          <input v-for="f in sec.fields" :key="f.key" v-model="sec.draft[f.key]" :placeholder="f.label + (f.req ? ' *' : '')" :required="f.req" />
+          <button type="submit" class="btn save">Lägg till</button>
+        </form>
+
         <table>
           <thead>
             <tr>
-              <th>Lag</th>
-              <th>Medlemmar</th>
-              <th>Reg. Datum</th>
+              <th v-for="f in sec.fields" :key="f.key">{{ f.label }}</th>
+              <th v-if="sec.hasMembers">Medlemmar</th>
+              <th v-if="sec.hasMembers">Reg. Datum</th>
               <th>Åtgärder</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="team in teams" :key="team.id">
-              <td>
-                <input v-if="editingTeamId === team.id" v-model="editForm.name" class="edit-input" />
-                <span v-else>{{ team.name }}</span>
+            <tr v-for="item in sec.items" :key="item.id">
+              <td v-for="f in sec.fields" :key="f.key">
+                <input v-if="editKey === sec.id + ':' + item.id" v-model="editForm[f.key]" :type="f.type || 'text'" :class="{ 'checkbox-input': f.type === 'checkbox' }" />
+                <span v-else>{{ formatVal(item[f.key], f) }}</span>
               </td>
-              <td>
-                <span v-if="editingTeamId !== team.id">{{ team.members.length }}</span>
-                <button v-if="editingTeamId !== team.id" @click="viewMembers(team)" class="small-btn">Visa</button>
+              <td v-if="sec.hasMembers">
+                {{ (item.members || []).length }}
+                <button @click="selectedTeam = item" class="small-btn">Visa</button>
               </td>
-              <td>{{ new Date(team.registeredAt).toLocaleString() }}</td>
+              <td v-if="sec.hasMembers">{{ item.registeredAt ? new Date(item.registeredAt).toLocaleString() : '' }}</td>
               <td>
-                <button v-if="editingTeamId !== team.id" @click="startEdit(team)" class="action-btn edit">Ändra</button>
-                <button v-if="editingTeamId !== team.id" @click="deleteTeam(team.id)" class="action-btn delete">Ta bort</button>
-                
-                <button v-if="editingTeamId === team.id" @click="saveEdit(team.id)" class="action-btn save">Spara</button>
-                <button v-if="editingTeamId === team.id" @click="cancelEdit" class="action-btn cancel">Avbryt</button>
+                <span v-if="editKey !== sec.id + ':' + item.id">
+                  <button @click="startEdit(sec, item)" class="btn edit">Ändra</button>
+                  <button @click="deleteItem(sec, item.id)" class="btn delete">Ta bort</button>
+                </span>
+                <span v-else>
+                  <button @click="saveEdit(sec, item.id)" class="btn save">Spara</button>
+                  <button @click="editKey = null" class="btn cancel">Avbryt</button>
+                </span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Members Modal (Simple View) -->
       <div v-if="selectedTeam" class="modal-overlay" @click.self="selectedTeam = null">
-        <div class="modal">
+        <div class="box modal">
           <h3>Medlemmar för {{ selectedTeam.name }}</h3>
           <ul>
             <li v-for="(m, i) in selectedTeam.members" :key="i">
-              <strong>{{ m.name }}</strong> ({{ m.nickname }}) - {{ m.role }} - {{ m.drink }} [{{ m.personnumber }}]
+              <strong>{{ m.name }}</strong> ({{ m.nickname }}) - {{ m.role }} - {{ m.drink }}
+              <span v-if="m.gasque"> - Gasque</span>
+              <span v-if="m.allergies"> - Allergi: {{ m.allergies }}</span>
+              [{{ m.personnumber }}]
             </li>
           </ul>
           <button @click="selectedTeam = null">Stäng</button>
@@ -77,223 +92,221 @@
 </template>
 
 <script>
+const GAME_SECTIONS = (game, label) => [
+  {
+    id: game + '-teams',
+    title: `${label} – Lag`,
+    url: `/api/${game}/teams`,
+    create: true,
+    fields: [
+      { key: 'name', label: 'Lagnamn', req: true },
+      { key: 'players', label: 'Spelare (kommaseparerade)', isList: true }
+    ]
+  },
+  {
+    id: game + '-matches',
+    title: `${label} – Matcher`,
+    url: `/api/${game}/matches`,
+    create: true,
+    fields: [
+      { key: 'round', label: 'Runda', req: true },
+      { key: 'team1', label: 'Lag 1', req: true },
+      { key: 'team2', label: 'Lag 2', req: true },
+      { key: 'winner', label: 'Vinnare' },
+      { key: 'matchTime', label: 'Tid' }
+    ]
+  }
+];
+
 export default {
   name: 'AdminPage',
   data() {
     return {
       username: '',
       password: '',
-      token: null,
+      token: sessionStorage.getItem('piraya_admin_token') || null,
+      tabs: { os: 'Otympliga Spelen', members: 'Medlemmar', lol: 'LoL', cs: 'Counter-Strike' },
+      tab: 'os',
+      errorMsg: '',
       isOpen: false,
-      teams: [],
-      editingTeamId: null,
+      settings: { maxTeams: 20, maxGasque: 120 },
+      sections: [],
+      editKey: null,
       editForm: {},
       selectedTeam: null
     };
   },
+  mounted() {
+    if (this.token) this.loadTab();
+  },
   methods: {
+    async api(path, opts = {}) {
+      this.errorMsg = '';
+      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${this.token}` };
+      const res = await fetch(path, { ...opts, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        this.errorMsg = data.error || `Fel (${res.status})`;
+        throw new Error(this.errorMsg);
+      }
+      return data;
+    },
     async login() {
       try {
-        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-        const baseUrl = `https://${ip}`;
-
-        const res = await fetch(`${baseUrl}/api/admin/login`, {
+        const data = await this.api('/api/admin/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: this.username, password: this.password })
         });
-        const data = await res.json();
-        if (data.success) {
-          this.token = data.token;
-          this.fetchData();
-        } else {
-          alert('Fel inloggningsuppgifter');
-        }
+        this.token = data.token;
+        sessionStorage.setItem('piraya_admin_token', data.token);
+        this.loadTab();
       } catch (e) {
-        console.error(e);
+        alert(e.message || 'Fel inloggningsuppgifter');
       }
     },
-    async fetchData() {
-      // i dont know how to do this
-      await this.refreshStatus();
+    logout() {
+      this.token = null;
+      sessionStorage.removeItem('piraya_admin_token');
     },
-    async refreshStatus() {
-        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
-        const baseUrl = `http://${ip}:${port}`;
-        
-        // Just calling status endpoint
-        const res = await fetch(`${baseUrl}/api/status`);
-        const data = await res.json();
+    setTab(key) {
+      this.tab = key;
+      this.editKey = null;
+      this.loadTab();
+    },
+    async loadTab() {
+      if (this.tab === 'os') {
+        const data = await this.api('/api/status');
         this.isOpen = data.isOpen;
-        this.teams = data.teams || [];
+        this.settings = {
+          maxTeams: data.maxTeams !== undefined ? data.maxTeams : 20,
+          maxGasque: data.maxGasque !== undefined ? data.maxGasque : 120
+        };
+        this.sections = [{
+          id: 'os-teams',
+          title: 'Anmälda Lag',
+          url: '/api/admin/teams',
+          hasMembers: true,
+          items: data.teams || [],
+          fields: [
+            { key: 'name', label: 'Lag', req: true },
+            { key: 'description', label: 'Beskrivning' },
+            { key: 'isLate', label: 'Sen', type: 'checkbox' }
+          ]
+        }];
+        return;
+      }
+
+      const defs = this.tab === 'members'
+        ? [{
+            id: 'members',
+            title: 'Medlemmar',
+            url: '/api/members',
+            create: true,
+            fields: [
+              { key: 'Smeknamn', label: 'Smeknamn', req: true },
+              { key: 'Namn', label: 'Namn', req: true },
+              { key: 'Roll', label: 'Roll' },
+              { key: 'quote', label: 'Citat' },
+              { key: 'bild', label: 'Bild' },
+              { key: 'telefonnummer', label: 'Telefon' }
+            ]
+          }]
+        : GAME_SECTIONS(this.tab, this.tab === 'lol' ? 'League of Legends' : 'Counter-Strike');
+
+      this.sections = await Promise.all(defs.map(async s => ({
+        ...s,
+        draft: {},
+        items: await this.api(s.url)
+      })));
+    },
+    formatVal(val, f) {
+      if (f.type === 'checkbox') return val ? 'Ja' : 'Nej';
+      if (f.isList) return (val || []).join(', ');
+      return val;
+    },
+    toPayload(sec, raw) {
+      const body = JSON.parse(JSON.stringify(raw));
+      sec.fields.forEach(f => {
+        if (f.isList && typeof body[f.key] === 'string') {
+          body[f.key] = body[f.key].split(',').map(s => s.trim()).filter(Boolean);
+        }
+      });
+      return body;
     },
     async toggleStatus() {
-      const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-      const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
-      const baseUrl = `http://${ip}:${port}`;
-
-      const res = await fetch(`${baseUrl}/api/admin/toggle`, { method: 'POST' });
-      const data = await res.json();
+      const data = await this.api('/api/admin/toggle', { method: 'POST' });
       this.isOpen = data.isOpen;
-      // If we just opened, fetch teams
-      if (this.isOpen) this.refreshStatus();
+      await this.loadTab();
     },
-    deleteTeam(id) {
-        if(!confirm('Är du säker?')) return;
-        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
-        const baseUrl = `http://${ip}:${port}`;
-
-        fetch(`${baseUrl}/api/admin/teams/${id}`, { method: 'DELETE' })
-            .then(() => this.refreshStatus());
+    async saveSettings() {
+      await this.api('/api/admin/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ isOpen: this.isOpen, maxTeams: Number(this.settings.maxTeams), maxGasque: Number(this.settings.maxGasque) })
+      });
+      await this.loadTab();
     },
-    startEdit(team) {
-        this.editingTeamId = team.id;
-        this.editForm = JSON.parse(JSON.stringify(team));
+    async createItem(sec) {
+      await this.api(sec.url, { method: 'POST', body: JSON.stringify(this.toPayload(sec, sec.draft)) });
+      sec.draft = {};
+      await this.loadTab();
     },
-    cancelEdit() {
-        this.editingTeamId = null;
-        this.editForm = {};
+    startEdit(sec, item) {
+      this.editKey = `${sec.id}:${item.id}`;
+      const copy = JSON.parse(JSON.stringify(item));
+      sec.fields.forEach(f => {
+        if (f.isList) copy[f.key] = (copy[f.key] || []).join(', ');
+      });
+      this.editForm = copy;
     },
-    saveEdit(id) {
-        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
-        const baseUrl = `http://${ip}:${port}`;
-
-        fetch(`${baseUrl}/api/admin/teams/${id}`, { 
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.editForm)
-        }).then(() => {
-            this.editingTeamId = null;
-            this.refreshStatus();
-        });
+    async saveEdit(sec, id) {
+      await this.api(`${sec.url}/${id}`, { method: 'PUT', body: JSON.stringify(this.toPayload(sec, this.editForm)) });
+      this.editKey = null;
+      await this.loadTab();
     },
-    viewMembers(team) {
-        this.selectedTeam = team;
+    async deleteItem(sec, id) {
+      if (!confirm('Är du säker?')) return;
+      await this.api(`${sec.url}/${id}`, { method: 'DELETE' });
+      await this.loadTab();
     }
   }
 };
 </script>
 
 <style scoped>
-.admin-page {
-  padding: 100px 20px;
-  color: white;
-  min-height: 100vh;
-  text-align: center;
-  background: #111;
-  font-family: sans-serif;
-}
-
-.login-container {
-  max-width: 300px;
-  margin: 0 auto;
-  background: #222;
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-}
-input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-}
-
-button {
-    padding: 10px 20px;
-    cursor: pointer;
-}
-
-.dashboard {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.controls {
-    background: #222;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
+.admin-page { padding: 100px 20px; color: white; min-height: 100vh; text-align: center; background: #111; font-family: sans-serif; }
+.box { background: #222; padding: 20px; border-radius: 8px; }
+.login-box { max-width: 300px; margin: 0 auto; }
+.dashboard { max-width: 1100px; margin: 0 auto; }
+.form-group { margin-bottom: 15px; text-align: left; }
+.form-group label { display: block; margin-bottom: 5px; }
+input { width: 100%; padding: 8px; box-sizing: border-box; background: #333; border: 1px solid #555; color: white; border-radius: 4px; }
+.checkbox-input { width: auto; }
+button { padding: 10px 20px; cursor: pointer; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; justify-content: center; }
+.tabs button { background: #222; color: #ccc; border: 1px solid #444; border-radius: 4px; }
+.tabs button.active { background: #a8180c; color: white; border-color: #a8180c; }
+.tabs .logout-btn { margin-left: auto; background: #333; color: white; }
+.error-banner { background: #f44336; padding: 10px; border-radius: 4px; margin-bottom: 16px; }
+.controls { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.inline-form { margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.inline-form input { width: auto; flex: 1 1 160px; }
+.inline-form label { display: flex; align-items: center; gap: 8px; }
+.inline-form label input { width: 90px; }
 .open { color: #4caf50; }
 .closed { color: #f44336; }
-
-.toggle-btn {
-    background: #a8180c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1rem;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #1a1a1a;
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-}
-
+.toggle-btn { background: #a8180c; color: white; border: none; border-radius: 4px; font-size: 1.1rem; }
+.section { margin-bottom: 36px; }
+table { width: 100%; border-collapse: collapse; background: #1a1a1a; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
 th { background: #333; }
-
-.action-btn {
-    margin-right: 5px;
-    padding: 5px 10px;
-    font-size: 0.8rem;
-}
-
-.delete { background: #f44336; color: white; border: none; }
-.edit { background: #2196f3; color: white; border: none; }
-.save { background: #4caf50; color: white; border: none; }
-.cancel { background: #ccc; border: none; }
-
-.small-btn {
-    font-size: 0.8rem;
-    padding: 2px 5px;
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal {
-    background: #222;
-    padding: 30px;
-    border-radius: 8px;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    text-align: left;
-}
+.btn { margin-right: 5px; padding: 5px 10px; font-size: 0.85rem; border: none; color: white; }
+.delete { background: #f44336; }
+.edit { background: #2196f3; }
+.save { background: #4caf50; }
+.cancel { background: #ccc; color: #111; }
+.small-btn { font-size: 0.8rem; padding: 2px 6px; margin-left: 6px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; }
+.modal { padding: 30px; max-width: 600px; max-height: 80vh; overflow-y: auto; text-align: left; }
 .modal ul { padding-left: 20px; }
 .modal li { margin-bottom: 8px; }
-
-.edit-input {
-    background: #333;
-    border: 1px solid #555;
-    color: white;
-}
 </style>

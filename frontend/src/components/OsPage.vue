@@ -212,11 +212,7 @@ export default {
   methods: {
     async fetchStatus() {
       try {
-        const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-        const port = process.env.VUE_APP_OTYMPLIGASPELEN_PORT || '3000';
-        const baseUrl = `https://${ip}:${port}`;
-        
-        const res = await fetch(`${baseUrl}/api/status`);
+        const res = await fetch('/api/status');
         const data = await res.json();
         
         this.isOpen = data.isOpen;
@@ -268,10 +264,7 @@ export default {
               members: this.formRef.members
           };
 
-          const ip = process.env.VUE_APP_OTYMPLIGASPELEN_IP || 'localhost';
-          const baseUrl = `http://${ip}`;
-
-          const res = await fetch(`${baseUrl}/api/register`, {
+          const res = await fetch('/api/register', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload)
