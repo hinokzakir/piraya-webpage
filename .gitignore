@@ -1,0 +1,9 @@
+data/
+pb_data/
+*.db
+*.db-wal
+*.db-shm
+.env
+node_modules/
+frontend/dist/
+.DS_Store

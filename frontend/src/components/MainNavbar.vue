@@ -26,8 +26,7 @@ export default {
 			navItems: [
 				{ to: '/', label: 'Hem' },
 				{ to: '/members', label: 'Medlemmar' },
-				{ to: '/about', label: 'Om oss' },
-				{ to: '/os', label: 'OS' }
+				{ to: '/about', label: 'Om oss' }
 			]
 		}
 	},
