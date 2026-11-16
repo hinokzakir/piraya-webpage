@@ -1,37 +1,52 @@
 <template>
 	<div class="hello">
 		<h1>Aktiva Medlemmar</h1>
-		<div class="members-container">
-			<div v-for="(member, index) in members" :key="index" class="member-card">
+		<p v-if="loading">Laddar medlemmar...</p>
+		<p v-else-if="members.length === 0">Inga medlemmar tillagda ännu.</p>
+		<div v-else class="members-container">
+			<div v-for="member in members" :key="member.id || member.Smeknamn" class="member-card">
 				<h2>{{ member.Smeknamn }}</h2>
-				<img :src="getImage(member.bild)" alt="Member Image" class="member-image" />
+				<img v-if="member.bild" :src="getImage(member.bild)" alt="Member Image" class="member-image" />
 				<p>{{ member.Namn }}</p>
 				<p>{{ member.Roll }}</p>
-				<p>Kända ord: "{{ member.quote }}"</p>
+				<p v-if="member.quote">Kända ord: "{{ member.quote }}"</p>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import membersData from '../assets/members.json'; // Import JSON file
-
 export default {
 	name: 'MembersPage',
 	data() {
 		return {
-			members: membersData // Assign imported JSON to `members`
+			members: [],
+			loading: true
 		};
 	},
-
+	async mounted() {
+		try {
+			const res = await fetch('/api/members');
+			if (res.ok) {
+				this.members = await res.json();
+			}
+		} catch (e) {
+			console.error('Kunde inte hämta medlemmar:', e);
+		} finally {
+			this.loading = false;
+		}
+	},
 	methods: {
 		getImage(imagePath) {
+			if (!imagePath) return '';
+			if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('/')) {
+				return imagePath;
+			}
 			try {
-				// Använd require för att dynamiskt ladda bilden baserat på sökvägen från JSON
 				return require(`@/assets/${imagePath}`);
 			} catch (e) {
 				console.error(`Kunde inte ladda bild: ${imagePath}`, e);
-				return ''; // Returnera en tom sträng eller en standardbild om det misslyckas
+				return '';
 			}
 		}
 	}
