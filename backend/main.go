@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -30,58 +31,54 @@ func main() {
 		adminUser:  env("ADMIN_USERNAME", "admin"),
 		adminPass:  env("ADMIN_PASSWORD", "piraya123"),
 		uploadsDir: uploadsDir,
+		sessions:   make(map[string]time.Time),
 	}
 
 	mux := http.NewServeMux()
 
-	// Member image uploads & static serving
-	mux.HandleFunc("GET /api/uploads/members/{filename}", s.serveMemberImage)
-	mux.HandleFunc("POST /api/admin/members/upload-images", s.uploadMemberImages)
-
-	// Page visibility
-	mux.HandleFunc("GET /api/pages", s.getPages)
-	mux.HandleFunc("POST /api/admin/pages/{page}/toggle", s.togglePage)
-
-	// Health
+	// Public routes
 	mux.HandleFunc("GET /api/health", s.health)
-
-	// Members
-	mux.HandleFunc("GET /api/members", s.listMembers)
-	mux.HandleFunc("POST /api/members", s.createMember)
-	mux.HandleFunc("PUT /api/members/{id}", s.updateMember)
-	mux.HandleFunc("DELETE /api/members/{id}", s.deleteMember)
-
-	// Otympliga Spelen (OS)
+	mux.HandleFunc("GET /api/pages", s.getPages)
 	mux.HandleFunc("GET /api/status", s.osStatus)
 	mux.HandleFunc("POST /api/register", s.osRegister)
 	mux.HandleFunc("POST /api/admin/login", s.adminLogin)
-	mux.HandleFunc("POST /api/admin/toggle", s.osToggle)
-	mux.HandleFunc("PUT /api/admin/settings", s.osUpdateSettings)
-	mux.HandleFunc("PUT /api/admin/teams/{id}", s.osUpdateTeam)
-	mux.HandleFunc("DELETE /api/admin/teams/{id}", s.osDeleteTeam)
-
-	// JSON batch import (OS, LoL, CS, Members)
-	mux.HandleFunc("POST /api/admin/import/{target}", s.importJSON)
-
-	// League of Legends (LoL)
+	mux.HandleFunc("GET /api/members", s.listMembers)
+	mux.HandleFunc("GET /api/uploads/members/{filename}", s.serveMemberImage)
 	mux.HandleFunc("GET /api/lol/teams", s.listTournamentTeams("lol"))
-	mux.HandleFunc("POST /api/lol/teams", s.createTournamentTeam("lol"))
-	mux.HandleFunc("PUT /api/lol/teams/{id}", s.updateTournamentTeam("lol"))
-	mux.HandleFunc("DELETE /api/lol/teams/{id}", s.deleteTournamentTeam("lol"))
 	mux.HandleFunc("GET /api/lol/matches", s.listMatches("lol"))
-	mux.HandleFunc("POST /api/lol/matches", s.createMatch("lol"))
-	mux.HandleFunc("PUT /api/lol/matches/{id}", s.updateMatch("lol"))
-	mux.HandleFunc("DELETE /api/lol/matches/{id}", s.deleteMatch("lol"))
-
-	// Counter-Strike (CS)
 	mux.HandleFunc("GET /api/cs/teams", s.listTournamentTeams("cs"))
-	mux.HandleFunc("POST /api/cs/teams", s.createTournamentTeam("cs"))
-	mux.HandleFunc("PUT /api/cs/teams/{id}", s.updateTournamentTeam("cs"))
-	mux.HandleFunc("DELETE /api/cs/teams/{id}", s.deleteTournamentTeam("cs"))
 	mux.HandleFunc("GET /api/cs/matches", s.listMatches("cs"))
-	mux.HandleFunc("POST /api/cs/matches", s.createMatch("cs"))
-	mux.HandleFunc("PUT /api/cs/matches/{id}", s.updateMatch("cs"))
-	mux.HandleFunc("DELETE /api/cs/matches/{id}", s.deleteMatch("cs"))
+
+	// Protected Admin routes (require valid bearer token)
+	mux.HandleFunc("POST /api/admin/pages/{page}/toggle", s.requireAdmin(s.togglePage))
+	mux.HandleFunc("GET /api/admin/teams", s.requireAdmin(s.adminListOSTeams))
+	mux.HandleFunc("POST /api/admin/toggle", s.requireAdmin(s.osToggle))
+	mux.HandleFunc("PUT /api/admin/settings", s.requireAdmin(s.osUpdateSettings))
+	mux.HandleFunc("PUT /api/admin/teams/{id}", s.requireAdmin(s.osUpdateTeam))
+	mux.HandleFunc("DELETE /api/admin/teams/{id}", s.requireAdmin(s.osDeleteTeam))
+	mux.HandleFunc("POST /api/admin/import/{target}", s.requireAdmin(s.importJSON))
+	mux.HandleFunc("POST /api/admin/members/upload-images", s.requireAdmin(s.uploadMemberImages))
+
+	// Members management (admin only)
+	mux.HandleFunc("POST /api/members", s.requireAdmin(s.createMember))
+	mux.HandleFunc("PUT /api/members/{id}", s.requireAdmin(s.updateMember))
+	mux.HandleFunc("DELETE /api/members/{id}", s.requireAdmin(s.deleteMember))
+
+	// League of Legends management (admin only)
+	mux.HandleFunc("POST /api/lol/teams", s.requireAdmin(s.createTournamentTeam("lol")))
+	mux.HandleFunc("PUT /api/lol/teams/{id}", s.requireAdmin(s.updateTournamentTeam("lol")))
+	mux.HandleFunc("DELETE /api/lol/teams/{id}", s.requireAdmin(s.deleteTournamentTeam("lol")))
+	mux.HandleFunc("POST /api/lol/matches", s.requireAdmin(s.createMatch("lol")))
+	mux.HandleFunc("PUT /api/lol/matches/{id}", s.requireAdmin(s.updateMatch("lol")))
+	mux.HandleFunc("DELETE /api/lol/matches/{id}", s.requireAdmin(s.deleteMatch("lol")))
+
+	// Counter-Strike management (admin only)
+	mux.HandleFunc("POST /api/cs/teams", s.requireAdmin(s.createTournamentTeam("cs")))
+	mux.HandleFunc("PUT /api/cs/teams/{id}", s.requireAdmin(s.updateTournamentTeam("cs")))
+	mux.HandleFunc("DELETE /api/cs/teams/{id}", s.requireAdmin(s.deleteTournamentTeam("cs")))
+	mux.HandleFunc("POST /api/cs/matches", s.requireAdmin(s.createMatch("cs")))
+	mux.HandleFunc("PUT /api/cs/matches/{id}", s.requireAdmin(s.updateMatch("cs")))
+	mux.HandleFunc("DELETE /api/cs/matches/{id}", s.requireAdmin(s.deleteMatch("cs")))
 
 	log.Printf("Go SQLite server listening on :%s (db=%s)", port, dbPath)
 	log.Fatal(http.ListenAndServe(":"+port, cors(mux)))

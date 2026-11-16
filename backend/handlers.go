@@ -1,7 +1,10 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/subtle"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -19,6 +23,8 @@ type Server struct {
 	adminUser  string
 	adminPass  string
 	uploadsDir string
+	sessions   map[string]time.Time
+	mu         sync.Mutex
 }
 
 type Member struct {
@@ -150,11 +156,58 @@ func (s *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, "invalid json")
 		return
 	}
-	if body.Username == s.adminUser && body.Password == s.adminPass {
-		writeJSON(w, http.StatusOK, map[string]any{"success": true, "token": "piraya-admin-token"})
+
+	userMatch := subtle.ConstantTimeCompare([]byte(body.Username), []byte(s.adminUser)) == 1
+	passMatch := subtle.ConstantTimeCompare([]byte(body.Password), []byte(s.adminPass)) == 1
+
+	if !userMatch || !passMatch {
+		// Delay 1 second to throttle brute-force attempts
+		time.Sleep(1 * time.Second)
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"success": false, "error": "Fel användarnamn eller lösenord"})
 		return
 	}
-	writeJSON(w, http.StatusUnauthorized, map[string]any{"success": false, "error": "invalid credentials"})
+
+	tokenBytes := make([]byte, 32)
+	if _, err := rand.Read(tokenBytes); err != nil {
+		writeErr(w, http.StatusInternalServerError, "kunde inte skapa session")
+		return
+	}
+	token := hex.EncodeToString(tokenBytes)
+
+	s.mu.Lock()
+	now := time.Now()
+	// Clean up expired sessions
+	for t, exp := range s.sessions {
+		if now.After(exp) {
+			delete(s.sessions, t)
+		}
+	}
+	s.sessions[token] = now.Add(24 * time.Hour)
+	s.mu.Unlock()
+
+	writeJSON(w, http.StatusOK, map[string]any{"success": true, "token": token})
+}
+
+func (s *Server) requireAdmin(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			writeErr(w, http.StatusUnauthorized, "Inloggning krävs (saknar token)")
+			return
+		}
+		token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+
+		s.mu.Lock()
+		expiry, ok := s.sessions[token]
+		s.mu.Unlock()
+
+		if !ok || time.Now().After(expiry) {
+			writeErr(w, http.StatusUnauthorized, "Ogiltig eller utgången session")
+			return
+		}
+
+		next(w, r)
+	}
 }
 
 // --- Members CRUD ---
@@ -274,11 +327,21 @@ func (s *Server) osStatus(w http.ResponseWriter, r *http.Request) {
 		if t.Members == nil {
 			t.Members = []OSTeamMember{}
 		}
+		var publicMembers []OSTeamMember
 		for _, m := range t.Members {
 			if m.Gasque {
 				usedGasque++
 			}
+			// Mask sensitive personal data (personnumber, allergies, name) from public view
+			publicMembers = append(publicMembers, OSTeamMember{
+				Nickname: m.Nickname,
+				Role:     m.Role,
+				Drink:    m.Drink,
+				Gasque:   m.Gasque,
+				IsLate:   m.IsLate,
+			})
 		}
+		t.Members = publicMembers
 		teams = append(teams, t)
 	}
 
@@ -293,6 +356,33 @@ func (s *Server) osStatus(w http.ResponseWriter, r *http.Request) {
 		"maxGasque":  maxGasque,
 		"teams":      teams,
 	})
+}
+
+func (s *Server) adminListOSTeams(w http.ResponseWriter, r *http.Request) {
+	rows, err := s.db.Query(`SELECT id, name, description, is_late, members_json, registered_at FROM os_teams ORDER BY id ASC`)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	var teams []OSTeam
+	for rows.Next() {
+		var t OSTeam
+		var lateInt int
+		var membersJSON string
+		if err := rows.Scan(&t.ID, &t.Name, &t.Description, &lateInt, &membersJSON, &t.RegisteredAt); err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		t.IsLate = lateInt != 0
+		_ = json.Unmarshal([]byte(membersJSON), &t.Members)
+		if t.Members == nil {
+			t.Members = []OSTeamMember{}
+		}
+		teams = append(teams, t)
+	}
+	writeJSON(w, http.StatusOK, teams)
 }
 
 func (s *Server) osRegister(w http.ResponseWriter, r *http.Request) {

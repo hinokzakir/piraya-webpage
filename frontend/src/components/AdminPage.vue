@@ -328,6 +328,11 @@ export default {
       const res = await fetch(path, { ...opts, headers });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 401 && this.token) {
+          this.logout();
+          this.errorMsg = 'Sessionen har gått ut eller är ogiltig. Logga in igen.';
+          throw new Error(this.errorMsg);
+        }
         this.errorMsg = data.error || `Fel (${res.status})`;
         throw new Error(this.errorMsg);
       }
@@ -370,12 +375,13 @@ export default {
           maxTeams: data.maxTeams !== undefined ? data.maxTeams : 20,
           maxGasque: data.maxGasque !== undefined ? data.maxGasque : 120
         };
+        const teams = await this.api('/api/admin/teams');
         this.sections = [{
           id: 'os-teams',
           title: 'Anmälda Lag',
           url: '/api/admin/teams',
           hasMembers: true,
-          items: data.teams || [],
+          items: teams || [],
           fields: [
             { key: 'name', label: 'Lag', req: true },
             { key: 'description', label: 'Beskrivning' },
