@@ -35,6 +35,55 @@
         <button @click="togglePage(tab)" class="toggle-btn">{{ pages[tab] ? 'Slå av' : 'Slå på' }}</button>
       </div>
 
+      <div v-if="tab === 'os' || tab === 'lol' || tab === 'cs'" class="box json-import-box">
+        <div class="json-import-header">
+          <h2>JSON-import ({{ tab.toUpperCase() }})</h2>
+          <button type="button" class="btn edit" @click="showImport = !showImport">
+            {{ showImport ? 'Dölj JSON-import' : 'Öppna JSON-import' }}
+          </button>
+        </div>
+
+        <div v-if="showImport" class="json-import-body">
+          <p class="import-help">
+            Klistra in JSON nedan för att automatiskt fylla databasen.
+          </p>
+
+          <div class="example-box">
+            <div class="example-header">
+              <span>Exempelstruktur:</span>
+              <button type="button" class="small-btn" @click="fillExample">Klistra in exempel</button>
+            </div>
+            <pre>{{ importExamples[tab] }}</pre>
+          </div>
+
+          <textarea
+            v-model="importText"
+            rows="8"
+            placeholder="Klistra in din JSON här..."
+            class="import-textarea"
+          ></textarea>
+
+          <div class="import-actions">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="importClear" />
+              Rensa tidigare {{ tab === 'os' ? 'lag' : 'lag och matcher' }} innan import
+            </label>
+            <button
+              type="button"
+              class="btn save"
+              :disabled="importing || !importText.trim()"
+              @click="runImport"
+            >
+              {{ importing ? 'Importerar...' : 'Importera' }}
+            </button>
+          </div>
+
+          <p v-if="importMessage" :class="importSuccess ? 'import-success' : 'import-error'">
+            {{ importMessage }}
+          </p>
+        </div>
+      </div>
+
       <div v-for="sec in sections" :key="sec.id" class="section">
         <h2>{{ sec.title }} ({{ sec.items.length }})</h2>
 
@@ -158,7 +207,43 @@ export default {
       sections: [],
       editKey: null,
       editForm: {},
-      selectedTeam: null
+      selectedTeam: null,
+      showImport: false,
+      importText: '',
+      importClear: false,
+      importing: false,
+      importMessage: '',
+      importSuccess: false,
+      importExamples: {
+        os: JSON.stringify([
+          {
+            name: "Lag Alpha",
+            description: "Tagga!",
+            isLate: false,
+            members: [
+              { name: "Anna Andersson", nickname: "Ankan", role: "Kapten", drink: "Öl", gasque: true, allergies: "Inga", personnumber: "20000101-1234" }
+            ]
+          }
+        ], null, 2),
+        lol: JSON.stringify({
+          teams: [
+            { name: "T1", groupName: "A", players: ["Faker", "Zeus", "Oner", "Gumayusi", "Keria"] },
+            { name: "Gen.G", groupName: "A", players: ["Chovy", "Canyon", "Kiin", "Peyz", "Lehends"] }
+          ],
+          matches: [
+            { round: "Grupp A", team1: "T1", team2: "Gen.G", winner: "", matchTime: "18:00" }
+          ]
+        }, null, 2),
+        cs: JSON.stringify({
+          teams: [
+            { name: "Ninjas in Pyjamas", groupName: "A", players: ["REZ", "alex", "maxster", "r1nkle", "ewjerkz"] },
+            { name: "Fnatic", groupName: "A", players: ["KRIMZ", "bodyy", "blameF", "matys", "nawwk"] }
+          ],
+          matches: [
+            { round: "Grupp A", team1: "Ninjas in Pyjamas", team2: "Fnatic", winner: "", matchTime: "19:00" }
+          ]
+        }, null, 2)
+      }
     };
   },
   mounted() {
@@ -196,6 +281,8 @@ export default {
     setTab(key) {
       this.tab = key;
       this.editKey = null;
+      this.importText = '';
+      this.importMessage = '';
       this.loadTab();
     },
     async loadTab() {
@@ -320,6 +407,36 @@ export default {
       if (!confirm('Är du säker?')) return;
       await this.api(`${sec.url}/${id}`, { method: 'DELETE' });
       await this.loadTab();
+    },
+    fillExample() {
+      this.importText = this.importExamples[this.tab] || '';
+      this.importMessage = '';
+    },
+    async runImport() {
+      this.importMessage = '';
+      let parsed;
+      try {
+        parsed = JSON.parse(this.importText);
+      } catch (e) {
+        this.importSuccess = false;
+        this.importMessage = 'Ogiltig JSON: ' + e.message;
+        return;
+      }
+      this.importing = true;
+      try {
+        const res = await this.api(`/api/admin/import/${this.tab}?clear=${this.importClear}`, {
+          method: 'POST',
+          body: JSON.stringify(parsed)
+        });
+        this.importSuccess = true;
+        this.importMessage = res.message || 'Importen lyckades!';
+        await this.loadTab();
+      } catch (e) {
+        this.importSuccess = false;
+        this.importMessage = e.message || 'Ett fel uppstod vid importen';
+      } finally {
+        this.importing = false;
+      }
     }
   }
 };
@@ -350,6 +467,20 @@ button { padding: 10px 20px; cursor: pointer; }
 .open { color: #4caf50; }
 .closed { color: #f44336; }
 .toggle-btn { background: #a8180c; color: white; border: none; border-radius: 4px; font-size: 1.1rem; }
+.json-import-box { margin-bottom: 24px; text-align: left; }
+.json-import-header { display: flex; justify-content: space-between; align-items: center; }
+.json-import-header h2 { margin: 0; font-size: 1.2rem; }
+.json-import-body { margin-top: 15px; }
+.import-help { color: #bbb; font-size: 0.9rem; margin-bottom: 12px; }
+.example-box { background: #181818; border: 1px solid #333; border-radius: 4px; padding: 10px 14px; margin-bottom: 12px; }
+.example-header { display: flex; justify-content: space-between; align-items: center; color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+.example-box pre { margin: 0; color: #7ec699; font-size: 0.8rem; overflow-x: auto; max-height: 180px; }
+.import-textarea { width: 100%; font-family: monospace; font-size: 0.85rem; background: #1a1a1a; color: #eee; border: 1px solid #444; border-radius: 4px; padding: 10px; box-sizing: border-box; resize: vertical; }
+.import-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; color: #ccc; }
+.checkbox-label input { width: auto; margin: 0; }
+.import-success { color: #4caf50; background: rgba(76, 175, 80, 0.15); border: 1px solid #4caf50; padding: 8px 12px; border-radius: 4px; margin-top: 12px; }
+.import-error { color: #f44336; background: rgba(244, 67, 54, 0.15); border: 1px solid #f44336; padding: 8px 12px; border-radius: 4px; margin-top: 12px; }
 .section { margin-bottom: 36px; }
 table { width: 100%; border-collapse: collapse; background: #1a1a1a; }
 th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }

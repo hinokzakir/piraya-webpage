@@ -50,6 +50,9 @@ func main() {
 	mux.HandleFunc("PUT /api/admin/teams/{id}", s.osUpdateTeam)
 	mux.HandleFunc("DELETE /api/admin/teams/{id}", s.osDeleteTeam)
 
+	// JSON batch import (OS, LoL, CS)
+	mux.HandleFunc("POST /api/admin/import/{target}", s.importJSON)
+
 	// League of Legends (LoL)
 	mux.HandleFunc("GET /api/lol/teams", s.listTournamentTeams("lol"))
 	mux.HandleFunc("POST /api/lol/teams", s.createTournamentTeam("lol"))

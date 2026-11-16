@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -669,4 +671,197 @@ func (s *Server) deleteMatch(game string) http.HandlerFunc {
 		}
 		writeJSON(w, http.StatusOK, map[string]bool{"deleted": true})
 	}
+}
+
+// --- Batch JSON Import ---
+
+func (s *Server) importJSON(w http.ResponseWriter, r *http.Request) {
+	target := r.PathValue("target")
+	if target != "os" && target != "lol" && target != "cs" {
+		writeErr(w, http.StatusBadRequest, "invalid target (must be os, lol, or cs)")
+		return
+	}
+
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil || len(strings.TrimSpace(string(bodyBytes))) == 0 {
+		writeErr(w, http.StatusBadRequest, "tom eller ogiltig JSON")
+		return
+	}
+
+	clearExisting := r.URL.Query().Get("clear") == "true"
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer tx.Rollback()
+
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	if target == "os" {
+		if clearExisting {
+			if _, err := tx.Exec(`DELETE FROM os_teams`); err != nil {
+				writeErr(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+		}
+
+		var teams []OSTeam
+		if err := json.Unmarshal(bodyBytes, &teams); err != nil {
+			var wrapper struct {
+				Teams []OSTeam `json:"teams"`
+			}
+			if err2 := json.Unmarshal(bodyBytes, &wrapper); err2 != nil {
+				writeErr(w, http.StatusBadRequest, "Ogiltig OS-JSON (förväntade lista av lag eller { teams: [...] })")
+				return
+			}
+			teams = wrapper.Teams
+		}
+
+		if len(teams) == 0 {
+			writeErr(w, http.StatusBadRequest, "Inga lag hittades i JSON")
+			return
+		}
+
+		count := 0
+		for _, t := range teams {
+			if strings.TrimSpace(t.Name) == "" {
+				continue
+			}
+			if t.Members == nil {
+				t.Members = []OSTeamMember{}
+			}
+			mb, _ := json.Marshal(t.Members)
+			regAt := t.RegisteredAt
+			if regAt == "" {
+				regAt = now
+			}
+			_, err := tx.Exec(`
+				INSERT INTO os_teams (name, description, is_late, members_json, registered_at)
+				VALUES (?, ?, ?, ?, ?)
+				ON CONFLICT(name) DO UPDATE SET
+					description = excluded.description,
+					is_late = excluded.is_late,
+					members_json = excluded.members_json,
+					registered_at = excluded.registered_at
+			`, t.Name, t.Description, b2i(t.IsLate), string(mb), regAt)
+			if err != nil {
+				writeErr(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			count++
+		}
+
+		if err := tx.Commit(); err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		writeJSON(w, http.StatusOK, map[string]any{
+			"success": true,
+			"message": fmt.Sprintf("Importerade %d lag för Otympliga Spelen", count),
+			"count":   count,
+		})
+		return
+	}
+
+	// target == "lol" || target == "cs"
+	if clearExisting {
+		if _, err := tx.Exec(`DELETE FROM tournament_teams WHERE game=?`, target); err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		if _, err := tx.Exec(`DELETE FROM tournament_matches WHERE game=?`, target); err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	var teams []TournamentTeam
+	var matches []TournamentMatch
+
+	var wrapper struct {
+		Teams   []TournamentTeam  `json:"teams"`
+		Matches []TournamentMatch `json:"matches"`
+	}
+	if err := json.Unmarshal(bodyBytes, &wrapper); err == nil && (len(wrapper.Teams) > 0 || len(wrapper.Matches) > 0) {
+		teams = wrapper.Teams
+		matches = wrapper.Matches
+	} else {
+		var rawList []json.RawMessage
+		if err := json.Unmarshal(bodyBytes, &rawList); err == nil && len(rawList) > 0 {
+			for _, raw := range rawList {
+				var m TournamentMatch
+				var t TournamentTeam
+				_ = json.Unmarshal(raw, &m)
+				_ = json.Unmarshal(raw, &t)
+				if m.Round != "" && m.Team1 != "" && m.Team2 != "" {
+					matches = append(matches, m)
+				} else if t.Name != "" {
+					teams = append(teams, t)
+				}
+			}
+		} else {
+			writeErr(w, http.StatusBadRequest, "Ogiltig turnerings-JSON (förväntade { teams: [...], matches: [...] } eller lista)")
+			return
+		}
+	}
+
+	if len(teams) == 0 && len(matches) == 0 {
+		writeErr(w, http.StatusBadRequest, "Inga lag eller matcher hittades i JSON")
+		return
+	}
+
+	teamCount := 0
+	for _, t := range teams {
+		if strings.TrimSpace(t.Name) == "" {
+			continue
+		}
+		if t.Players == nil {
+			t.Players = []string{}
+		}
+		pj, _ := json.Marshal(t.Players)
+		created := t.CreatedAt
+		if created == "" {
+			created = now
+		}
+		_, err := tx.Exec(`
+			INSERT INTO tournament_teams (game, name, group_name, players_json, created_at)
+			VALUES (?, ?, ?, ?, ?)
+		`, target, t.Name, t.GroupName, string(pj), created)
+		if err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		teamCount++
+	}
+
+	matchCount := 0
+	for _, m := range matches {
+		if strings.TrimSpace(m.Round) == "" || strings.TrimSpace(m.Team1) == "" || strings.TrimSpace(m.Team2) == "" {
+			continue
+		}
+		_, err := tx.Exec(`
+			INSERT INTO tournament_matches (game, round, team1, team2, winner, match_time)
+			VALUES (?, ?, ?, ?, ?, ?)
+		`, target, m.Round, m.Team1, m.Team2, m.Winner, m.MatchTime)
+		if err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		matchCount++
+	}
+
+	if err := tx.Commit(); err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"success":         true,
+		"message":         fmt.Sprintf("Importerade %d lag och %d matcher för %s", teamCount, matchCount, strings.ToUpper(target)),
+		"importedTeams":   teamCount,
+		"importedMatches": matchCount,
+	})
 }
