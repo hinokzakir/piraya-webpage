@@ -1,7 +1,6 @@
 services:
   frontend:
-    build:
-      context: ./frontend
+    image: hinokzakir/piraya-vue-frontend:latest
     ports:
       - "80:80"
     restart: unless-stopped
@@ -9,15 +8,12 @@ services:
       - backend
 
   backend:
-    build:
-      context: ./backend
-    expose:
-      - "8080"
+    image: hinokzakir/piraya-go-backend:latest
     environment:
       - PORT=8080
       - DB_PATH=/data/piraya.db
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-piraya123}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
       - ./data:/data
     restart: unless-stopped
