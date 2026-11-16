@@ -5,7 +5,7 @@
       <strong>VIKTIGT:</strong> Matcher kan börja tidigare eller senare än schemalagt beroende på hur matcherna går. Ha koll på Discord-servern och streamen för uppdateringar!
     </div>
     <div class="subtitle">
-      PRISERNA FÖR TURNERINGEN ÄR:<br> 1:a plats: 1500kr till laget<br> 2:a plats: 500kr till laget<br> Best Highlight: 300kr till lag- eller soloplay.
+      PRISERNA FÖR TURNERINGEN ÄR:<br> 1:a plats: 1500kr till laget<br> 2:a plats: 500kr till laget
     </div>
     <div class="subtitle">
       Klicka här för vår discord server och twitch!<br><br>
