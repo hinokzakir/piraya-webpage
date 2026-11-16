@@ -144,25 +144,25 @@ export default {
           content: `
             <p>Alla matcher spelas hemma</p>
             <p>OBS: tiderna är ungefärliga, ha koll på streamen och discord</p>
-            <h3>Onsdag 3/12</h3>
-            <p>16:00 - 22:00<br>Max 1 match per lag</p>
-            <h3>Torsdag 4/12</h3>
+            <h3>Onsdag 18/11</h3>
+            <p>18:00 - 22:00<br>Gruppmatcher, gruppetta och grupptvåa vidare</p>
+            <h3>Torsdag 19/11</h3>
             <p>17:00 - 21:30<br>1 - 2 matcher per lag som kvarstår</p>
-            <h3>Fredag 5/12</h3>
+            <h3>Lördag 21/11</h3>
             <p>18:00 - 22:00</p>
           `
         },
         {
           title: 'Streaming',
           content: `
-            <p>Alla matcher streamas på vår Twitch:</p>
+            <p>Kvartsfinal och frammåt streamas på vår Twitch:</p>
             <a href="https://twitch.tv/pirayagamingproviders" target="_blank" class="twitch-btn">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                 <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
               </svg>
               twitch.tv/pirayagamingproviders
             </a>
-            <p>På fredagen visas matcherna med live commentary på Kårhuset Origo.</p>
+            <p>På Lördagen visas matcherna med live commentary på Kårhuset Origo.</p>
           `
         },
         {
@@ -183,10 +183,11 @@ export default {
           title: 'Spelupplägg',
           content: `
             <ul>
+              <li>Gruppspel först, gruppetta och grupptvåa vidare till kvartsfinal</li>
               <li>Vanlig bracket (Single Elimination)</li>
               <li>Finalen spelas Bäst av 3 (BO3)</li>
               <li>Spelschema lottas och läggs upp före start</li>
-              <li>Alla matcher streamas på Twitch</li>
+              <li>Kvartsfinal och frammåt streamas på Twitch</li>
             </ul>
           `
         },
@@ -194,7 +195,7 @@ export default {
           title: 'CS-turneringen',
           content: `
             <p><strong>Ersätter detta CS-turneringen?</strong></p>
-            <p>Nej! CS-turneringen planeras till Q1 2026.</p>
+            <p>Nej! CS-turneringen planeras till Q1 2027.</p>
           `
         },
         {
