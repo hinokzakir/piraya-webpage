@@ -35,9 +35,9 @@
         <button @click="togglePage(tab)" class="toggle-btn">{{ pages[tab] ? 'Slå av' : 'Slå på' }}</button>
       </div>
 
-      <div v-if="tab === 'os' || tab === 'lol' || tab === 'cs'" class="box json-import-box">
+      <div v-if="tab === 'os' || tab === 'lol' || tab === 'cs' || tab === 'members'" class="box json-import-box">
         <div class="json-import-header">
-          <h2>JSON-import ({{ tab.toUpperCase() }})</h2>
+          <h2>JSON-import ({{ tab === 'members' ? 'Medlemmar' : tab.toUpperCase() }})</h2>
           <button type="button" class="btn edit" @click="showImport = !showImport">
             {{ showImport ? 'Dölj JSON-import' : 'Öppna JSON-import' }}
           </button>
@@ -45,7 +45,7 @@
 
         <div v-if="showImport" class="json-import-body">
           <p class="import-help">
-            Klistra in JSON nedan för att automatiskt fylla databasen.
+            Klistra in JSON nedan för att automatiskt fylla databasen.{{ tab === 'members' ? ' Alla medlemmar importeras utan profilbild.' : '' }}
           </p>
 
           <div class="example-box">
@@ -66,7 +66,7 @@
           <div class="import-actions">
             <label class="checkbox-label">
               <input type="checkbox" v-model="importClear" />
-              Rensa tidigare {{ tab === 'os' ? 'lag' : 'lag och matcher' }} innan import
+              Rensa tidigare {{ tab === 'members' ? 'medlemmar' : (tab === 'os' ? 'lag' : 'lag och matcher') }} innan import
             </label>
             <button
               type="button"
@@ -81,6 +81,53 @@
           <p v-if="importMessage" :class="importSuccess ? 'import-success' : 'import-error'">
             {{ importMessage }}
           </p>
+        </div>
+      </div>
+
+      <div v-if="tab === 'members'" class="box upload-box">
+        <div class="upload-header">
+          <h2>Ladda upp medlemsbilder</h2>
+        </div>
+        <p class="import-help">
+          Välj en eller flera bilder (t.ex. <code>Findus.jpg</code>, <code>Torkel.png</code>). Om filnamnet matchar en medlems smeknamn kopplas och visas bilden automatiskt!
+        </p>
+
+        <div class="upload-controls">
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            ref="imageInput"
+            @change="handleFileSelect"
+            class="file-input"
+          />
+          <button
+            type="button"
+            class="btn save"
+            :disabled="uploadingImages || !selectedFiles.length"
+            @click="uploadMemberImages"
+          >
+            {{ uploadingImages ? 'Laddar upp...' : 'Ladda upp (' + selectedFiles.length + ' bild' + (selectedFiles.length === 1 ? '' : 'er') + ')' }}
+          </button>
+        </div>
+
+        <p v-if="uploadMessage" :class="uploadSuccess ? 'import-success' : 'import-error'">
+          {{ uploadMessage }}
+        </p>
+
+        <div v-if="uploadDetails" class="upload-details">
+          <div v-if="uploadDetails.matched && uploadDetails.matched.length" class="matched-list">
+            <strong>Kopplade bilder:</strong>
+            <ul>
+              <li v-for="(m, i) in uploadDetails.matched" :key="i">✓ {{ m }}</li>
+            </ul>
+          </div>
+          <div v-if="uploadDetails.unmatched && uploadDetails.unmatched.length" class="unmatched-list">
+            <strong>Ej matchade filer:</strong>
+            <ul>
+              <li v-for="(u, i) in uploadDetails.unmatched" :key="i">✗ {{ u }}</li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -121,6 +168,10 @@
                   <button type="button" class="btn" :class="item.winner === item.team1 ? 'save' : 'pick'" @click="setWinner(sec, item, item.team1)">{{ item.team1 }}</button>
                   <button type="button" class="btn" :class="item.winner === item.team2 ? 'save' : 'pick'" @click="setWinner(sec, item, item.team2)">{{ item.team2 }}</button>
                   <button v-if="item.winner" type="button" class="btn cancel" @click="setWinner(sec, item, '')">×</button>
+                </span>
+                <span v-else-if="f.key === 'bild' && item[f.key]" class="img-cell">
+                  <img v-if="item[f.key].startsWith('/') || item[f.key].startsWith('http')" :src="item[f.key]" class="cell-thumb" alt="Bild" />
+                  <span>{{ item[f.key] }}</span>
                 </span>
                 <span v-else>{{ formatVal(item[f.key], f) }}</span>
               </td>
@@ -208,6 +259,11 @@ export default {
       editKey: null,
       editForm: {},
       selectedTeam: null,
+      selectedFiles: [],
+      uploadingImages: false,
+      uploadMessage: '',
+      uploadSuccess: false,
+      uploadDetails: null,
       showImport: false,
       importText: '',
       importClear: false,
@@ -215,6 +271,22 @@ export default {
       importMessage: '',
       importSuccess: false,
       importExamples: {
+        members: JSON.stringify([
+          {
+            "Smeknamn": "Findus",
+            "Namn": "Samuel Johansson",
+            "Roll": "SP",
+            "quote": "Köpte du 2 ciggpack? 3.",
+            "telefonnummer": "0725507724"
+          },
+          {
+            "Smeknamn": "Torkel",
+            "Namn": "Vincent Öhlund",
+            "Roll": "SID",
+            "quote": "Låt inte gamla vanor vara stopp för nya banor",
+            "telefonnummer": "0706800527"
+          }
+        ], null, 2),
         os: JSON.stringify([
           {
             name: "Lag Alpha",
@@ -283,6 +355,10 @@ export default {
       this.editKey = null;
       this.importText = '';
       this.importMessage = '';
+      this.selectedFiles = [];
+      this.uploadMessage = '';
+      this.uploadDetails = null;
+      if (this.$refs.imageInput) this.$refs.imageInput.value = '';
       this.loadTab();
     },
     async loadTab() {
@@ -408,6 +484,44 @@ export default {
       await this.api(`${sec.url}/${id}`, { method: 'DELETE' });
       await this.loadTab();
     },
+    handleFileSelect(e) {
+      this.selectedFiles = Array.from(e.target.files || []);
+      this.uploadMessage = '';
+      this.uploadDetails = null;
+    },
+    async uploadMemberImages() {
+      if (!this.selectedFiles.length) return;
+      this.uploadingImages = true;
+      this.uploadMessage = '';
+      this.uploadDetails = null;
+      try {
+        const fd = new FormData();
+        this.selectedFiles.forEach(file => {
+          fd.append('images', file);
+        });
+        const headers = { Authorization: `Bearer ${this.token}` };
+        const res = await fetch('/api/admin/members/upload-images', {
+          method: 'POST',
+          headers,
+          body: fd
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || `Fel (${res.status})`);
+        }
+        this.uploadSuccess = true;
+        this.uploadMessage = data.message || 'Uppladdning klar!';
+        this.uploadDetails = data;
+        this.selectedFiles = [];
+        if (this.$refs.imageInput) this.$refs.imageInput.value = '';
+        await this.loadTab();
+      } catch (e) {
+        this.uploadSuccess = false;
+        this.uploadMessage = e.message || 'Ett fel uppstod vid bilduppladdningen';
+      } finally {
+        this.uploadingImages = false;
+      }
+    },
     fillExample() {
       this.importText = this.importExamples[this.tab] || '';
       this.importMessage = '';
@@ -481,6 +595,15 @@ button { padding: 10px 20px; cursor: pointer; }
 .checkbox-label input { width: auto; margin: 0; }
 .import-success { color: #4caf50; background: rgba(76, 175, 80, 0.15); border: 1px solid #4caf50; padding: 8px 12px; border-radius: 4px; margin-top: 12px; }
 .import-error { color: #f44336; background: rgba(244, 67, 54, 0.15); border: 1px solid #f44336; padding: 8px 12px; border-radius: 4px; margin-top: 12px; }
+.upload-box { margin-bottom: 24px; text-align: left; }
+.upload-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+.upload-controls .file-input { width: auto; flex: 1 1 200px; }
+.upload-details { margin-top: 14px; font-size: 0.85rem; display: flex; flex-wrap: wrap; gap: 20px; }
+.matched-list { color: #4caf50; }
+.matched-list ul, .unmatched-list ul { margin: 4px 0 0 0; padding-left: 18px; }
+.unmatched-list { color: #f44336; }
+.cell-thumb { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 6px; }
+.img-cell { display: inline-flex; align-items: center; }
 .section { margin-bottom: 36px; }
 table { width: 100%; border-collapse: collapse; background: #1a1a1a; }
 th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }

@@ -20,13 +20,23 @@ func main() {
 	}
 	defer db.Close()
 
+	uploadsDir := env("UPLOADS_DIR", filepath.Join(filepath.Dir(dbPath), "uploads", "members"))
+	if err := os.MkdirAll(uploadsDir, 0o755); err != nil {
+		log.Printf("warning: could not create uploads dir: %v", err)
+	}
+
 	s := &Server{
-		db:        db,
-		adminUser: env("ADMIN_USERNAME", "admin"),
-		adminPass: env("ADMIN_PASSWORD", "piraya123"),
+		db:         db,
+		adminUser:  env("ADMIN_USERNAME", "admin"),
+		adminPass:  env("ADMIN_PASSWORD", "piraya123"),
+		uploadsDir: uploadsDir,
 	}
 
 	mux := http.NewServeMux()
+
+	// Member image uploads & static serving
+	mux.HandleFunc("GET /api/uploads/members/{filename}", s.serveMemberImage)
+	mux.HandleFunc("POST /api/admin/members/upload-images", s.uploadMemberImages)
 
 	// Page visibility
 	mux.HandleFunc("GET /api/pages", s.getPages)
@@ -50,7 +60,7 @@ func main() {
 	mux.HandleFunc("PUT /api/admin/teams/{id}", s.osUpdateTeam)
 	mux.HandleFunc("DELETE /api/admin/teams/{id}", s.osDeleteTeam)
 
-	// JSON batch import (OS, LoL, CS)
+	// JSON batch import (OS, LoL, CS, Members)
 	mux.HandleFunc("POST /api/admin/import/{target}", s.importJSON)
 
 	// League of Legends (LoL)

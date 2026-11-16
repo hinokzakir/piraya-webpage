@@ -5,16 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type Server struct {
-	db        *sql.DB
-	adminUser string
-	adminPass string
+	db         *sql.DB
+	adminUser  string
+	adminPass  string
+	uploadsDir string
 }
 
 type Member struct {
@@ -677,8 +681,8 @@ func (s *Server) deleteMatch(game string) http.HandlerFunc {
 
 func (s *Server) importJSON(w http.ResponseWriter, r *http.Request) {
 	target := r.PathValue("target")
-	if target != "os" && target != "lol" && target != "cs" {
-		writeErr(w, http.StatusBadRequest, "invalid target (must be os, lol, or cs)")
+	if target != "os" && target != "lol" && target != "cs" && target != "members" {
+		writeErr(w, http.StatusBadRequest, "invalid target (must be os, lol, cs, or members)")
 		return
 	}
 
@@ -761,6 +765,81 @@ func (s *Server) importJSON(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"success": true,
 			"message": fmt.Sprintf("Importerade %d lag för Otympliga Spelen", count),
+			"count":   count,
+		})
+		return
+	}
+
+	if target == "members" {
+		if clearExisting {
+			if _, err := tx.Exec(`DELETE FROM members`); err != nil {
+				writeErr(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+		}
+
+		var members []Member
+		if err := json.Unmarshal(bodyBytes, &members); err != nil {
+			var wrapper struct {
+				Members []Member `json:"members"`
+			}
+			if err2 := json.Unmarshal(bodyBytes, &wrapper); err2 != nil {
+				writeErr(w, http.StatusBadRequest, "Ogiltig medlems-JSON (förväntade lista eller { members: [...] })")
+				return
+			}
+			members = wrapper.Members
+		}
+
+		if len(members) == 0 {
+			writeErr(w, http.StatusBadRequest, "Inga medlemmar hittades i JSON")
+			return
+		}
+
+		count := 0
+		for _, m := range members {
+			if strings.TrimSpace(m.Smeknamn) == "" || strings.TrimSpace(m.Namn) == "" {
+				continue
+			}
+			// Alla members ska inte ha nån profilbild vid import: bild = ""
+			if clearExisting {
+				_, err := tx.Exec(
+					`INSERT INTO members (smeknamn, namn, roll, quote, bild, telefonnummer) VALUES (?, ?, ?, ?, '', ?)`,
+					m.Smeknamn, m.Namn, m.Roll, m.Quote, m.Telefonnummer,
+				)
+				if err != nil {
+					writeErr(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+			} else {
+				var existingID int64
+				err := tx.QueryRow(`SELECT id FROM members WHERE LOWER(smeknamn) = LOWER(?) LIMIT 1`, m.Smeknamn).Scan(&existingID)
+				if err == nil {
+					_, err = tx.Exec(
+						`UPDATE members SET namn=?, roll=?, quote=?, bild='', telefonnummer=? WHERE id=?`,
+						m.Namn, m.Roll, m.Quote, m.Telefonnummer, existingID,
+					)
+				} else {
+					_, err = tx.Exec(
+						`INSERT INTO members (smeknamn, namn, roll, quote, bild, telefonnummer) VALUES (?, ?, ?, ?, '', ?)`,
+						m.Smeknamn, m.Namn, m.Roll, m.Quote, m.Telefonnummer,
+					)
+				}
+				if err != nil {
+					writeErr(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+			}
+			count++
+		}
+
+		if err := tx.Commit(); err != nil {
+			writeErr(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		writeJSON(w, http.StatusOK, map[string]any{
+			"success": true,
+			"message": fmt.Sprintf("Importerade %d medlemmar (utan profilbild)", count),
 			"count":   count,
 		})
 		return
@@ -863,5 +942,186 @@ func (s *Server) importJSON(w http.ResponseWriter, r *http.Request) {
 		"message":         fmt.Sprintf("Importerade %d lag och %d matcher för %s", teamCount, matchCount, strings.ToUpper(target)),
 		"importedTeams":   teamCount,
 		"importedMatches": matchCount,
+	})
+}
+
+// --- Member Images & File Uploads ---
+
+func cleanFileName(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	replacer := strings.NewReplacer(
+		"å", "a", "ä", "a", "ö", "o",
+		"é", "e", "è", "e",
+		" ", "_",
+	)
+	s = replacer.Replace(s)
+	var b strings.Builder
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_' || r == '-' {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
+func matchNickname(fileNameBase, memberNick string) bool {
+	fClean := cleanFileName(fileNameBase)
+	mClean := cleanFileName(memberNick)
+	if fClean == "" || mClean == "" {
+		return false
+	}
+	if fClean == mClean || strings.EqualFold(fileNameBase, memberNick) {
+		return true
+	}
+	fNoSep := strings.ReplaceAll(strings.ReplaceAll(fClean, "_", ""), "-", "")
+	mNoSep := strings.ReplaceAll(strings.ReplaceAll(mClean, "_", ""), "-", "")
+	if fNoSep == mNoSep {
+		return true
+	}
+	if strings.HasPrefix(fNoSep, mNoSep) || strings.Contains(fNoSep, mNoSep) {
+		return true
+	}
+	return false
+}
+
+func (s *Server) serveMemberImage(w http.ResponseWriter, r *http.Request) {
+	filename := filepath.Base(r.PathValue("filename"))
+	if filename == "." || filename == "/" || filename == "" {
+		writeErr(w, http.StatusBadRequest, "ogiltigt filnamn")
+		return
+	}
+	filePath := filepath.Join(s.uploadsDir, filename)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		http.NotFound(w, r)
+		return
+	}
+	http.ServeFile(w, r, filePath)
+}
+
+func (s *Server) uploadMemberImages(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		writeErr(w, http.StatusBadRequest, "Kunde inte läsa uppladdade filer: "+err.Error())
+		return
+	}
+	if r.MultipartForm == nil || len(r.MultipartForm.File) == 0 {
+		writeErr(w, http.StatusBadRequest, "Inga filer mottogs")
+		return
+	}
+
+	var allFiles []*multipart.FileHeader
+	for _, headers := range r.MultipartForm.File {
+		allFiles = append(allFiles, headers...)
+	}
+
+	if len(allFiles) == 0 {
+		writeErr(w, http.StatusBadRequest, "Inga filer hittades i formuläret")
+		return
+	}
+
+	rows, err := s.db.Query(`SELECT id, smeknamn, namn FROM members`)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer rows.Close()
+
+	type memberInfo struct {
+		id       int64
+		smeknamn string
+		namn     string
+	}
+	var members []memberInfo
+	for rows.Next() {
+		var mi memberInfo
+		if err := rows.Scan(&mi.id, &mi.smeknamn, &mi.namn); err == nil {
+			members = append(members, mi)
+		}
+	}
+
+	if len(members) == 0 {
+		writeErr(w, http.StatusBadRequest, "Det finns inga medlemmar i databasen att koppla bilderna till. Importera medlemmar först!")
+		return
+	}
+
+	if err := os.MkdirAll(s.uploadsDir, 0o755); err != nil {
+		writeErr(w, http.StatusInternalServerError, "Kunde inte skapa uppladdningsmapp: "+err.Error())
+		return
+	}
+
+	var matched []string
+	var unmatched []string
+
+	for _, fh := range allFiles {
+		ext := strings.ToLower(filepath.Ext(fh.Filename))
+		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" && ext != ".gif" {
+			unmatched = append(unmatched, fh.Filename+" (ej bildformat)")
+			continue
+		}
+
+		baseName := strings.TrimSuffix(fh.Filename, filepath.Ext(fh.Filename))
+
+		var targetMember *memberInfo
+		for i := range members {
+			if matchNickname(baseName, members[i].smeknamn) {
+				targetMember = &members[i]
+				break
+			}
+		}
+		if targetMember == nil {
+			for i := range members {
+				if matchNickname(baseName, members[i].namn) {
+					targetMember = &members[i]
+					break
+				}
+			}
+		}
+
+		if targetMember == nil {
+			unmatched = append(unmatched, fh.Filename)
+			continue
+		}
+
+		file, err := fh.Open()
+		if err != nil {
+			unmatched = append(unmatched, fh.Filename+" (kunde inte öppnas)")
+			continue
+		}
+
+		savedName := fmt.Sprintf("%s%s", cleanFileName(targetMember.smeknamn), ext)
+		destPath := filepath.Join(s.uploadsDir, savedName)
+		dst, err := os.Create(destPath)
+		if err != nil {
+			file.Close()
+			unmatched = append(unmatched, fh.Filename+" (kunde inte sparas)")
+			continue
+		}
+		_, err = io.Copy(dst, file)
+		file.Close()
+		dst.Close()
+		if err != nil {
+			unmatched = append(unmatched, fh.Filename+" (fel vid skrivning)")
+			continue
+		}
+
+		imageURL := "/api/uploads/members/" + savedName
+		_, err = s.db.Exec(`UPDATE members SET bild=? WHERE id=?`, imageURL, targetMember.id)
+		if err != nil {
+			unmatched = append(unmatched, fh.Filename+" (databasfel)")
+			continue
+		}
+
+		matched = append(matched, fmt.Sprintf("%s (%s -> %s)", targetMember.smeknamn, fh.Filename, savedName))
+	}
+
+	msg := fmt.Sprintf("Kopplade %d bild(er) till medlemmar.", len(matched))
+	if len(unmatched) > 0 {
+		msg += fmt.Sprintf(" %d fil(er) kunde inte matchas.", len(unmatched))
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"success":   true,
+		"message":   msg,
+		"matched":   matched,
+		"unmatched": unmatched,
 	})
 }
